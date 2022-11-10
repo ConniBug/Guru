@@ -42,19 +42,7 @@ public class MemoryManagement {
 			res = new File("C:\\Users\\synte\\Desktop\\test123\\configuration");
 		}
 		
-		for(File configuration : res.listFiles()) {
-			String clazz = configuration.getName().split("[.]")[0];
-			StringBuilder data = new StringBuilder();
-			try {
-				List<String> lines = FileUtils.readLines(configuration, StandardCharsets.UTF_8);
-				lines.forEach(data::append);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			JSONObject clazzConfiguration = new JSONObject(data.toString());
-			this.json.put(clazz, clazzConfiguration);
-		}
+		this.addJsonFiles(res);
 		
 		this.clazzScanner = new ClazzScanner(this);
 		
@@ -64,7 +52,8 @@ public class MemoryManagement {
 		}
 		
 	}
-		public void inject() {
+	
+	public void inject() {
 		
 		//instantiate the reflection scanner
 		this.clazzScanner.includeClassInScanner(Guru.getInstance());
@@ -74,13 +63,42 @@ public class MemoryManagement {
 			
 	}
 	
+	public void addJsonFiles(File res) {
+		
+		//System.out.println("Processing " + res.getAbsoluteFile());
+		
+		for(File configuration : res.listFiles()) {
+			if(configuration.isDirectory()) {
+				this.addJsonFiles(configuration);
+				continue;
+			}
+			
+			String name = configuration.getAbsolutePath().split("configuration")[1].replace("\\", ".").substring(1).replace(".json", "");
+			
+			StringBuilder data = new StringBuilder();
+			try {
+				List<String> lines = FileUtils.readLines(configuration, StandardCharsets.UTF_8);
+				lines.forEach(data::append);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			JSONObject clazzConfiguration = new JSONObject(data.toString());
+			this.json.put(name, clazzConfiguration);
+		}
+		
+	}
+	
 	
 	public Map<String, JSONObject> getJson() {
 		return json;
 	}
-	public JSONObject retrieveJsonConfiguration(Class<?> clazz) {
-		return this.json.get(this.json.keySet().stream().filter(o -> clazz.getSimpleName().equals(o)).findFirst().get());
+	
+	public JSONObject retrieveJsonConfiguration(String path) {
+		return this.json.get(this.json.keySet().stream().filter(path::equals).findFirst().get());
 	}
+	
+	
 	public ClazzScanner getClazzScanner() {
 		return clazzScanner;
 	}

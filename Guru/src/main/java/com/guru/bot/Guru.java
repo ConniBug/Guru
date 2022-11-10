@@ -1,9 +1,12 @@
 package com.guru.bot;
 
+import com.guru.commands.CommandManager;
 import com.guru.data.MemoryManagement;
 import com.guru.data.StartupConfiguration;
 
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.api.sharding.ShardManager;
 
 public class Guru {
 
@@ -11,6 +14,9 @@ public class Guru {
 	
 	private DefaultShardManagerBuilder sharedManager;
 	private MemoryManagement management;
+	private CommandManager commandManager;
+	
+	private ShardManager JDA;
 	
 	private StartupConfiguration startupConfiguration;
 	
@@ -22,14 +28,19 @@ public class Guru {
 		this.startupConfiguration = new StartupConfiguration();
 		this.management.inject();
 
-		this.sharedManager = DefaultShardManagerBuilder.createDefault(this.management.getCredentials().AUTH_KEY);
-		this.sharedManager.setStatus(this.startupConfiguration.getStatus());
+		this.sharedManager = DefaultShardManagerBuilder
+							 		.createDefault(this.management.getCredentials().AUTH_KEY)
+							 		.setStatus(this.startupConfiguration.getStatus())
+							 		.enableIntents(GatewayIntent.MESSAGE_CONTENT);
 		
 		
-		this.sharedManager.addEventListeners(new TestEvent());
-		this.sharedManager.build();
+		this.commandManager = new CommandManager();
+		this.commandManager.loadCommands();
 		
-	
+		
+		//System.exit(0);
+		JDA = this.sharedManager.build();
+		
 	}
 	
 	
@@ -47,6 +58,36 @@ public class Guru {
 
 	public DefaultShardManagerBuilder getSharedManager() {
 		return sharedManager;
+	}
+
+
+	public CommandManager getCommandManager() {
+		return commandManager;
+	}
+
+
+	public void setCommandManager(CommandManager commandManager) {
+		this.commandManager = commandManager;
+	}
+
+
+	public void setSharedManager(DefaultShardManagerBuilder sharedManager) {
+		this.sharedManager = sharedManager;
+	}
+
+
+	public void setManagement(MemoryManagement management) {
+		this.management = management;
+	}
+
+
+	public void setStartupConfiguration(StartupConfiguration startupConfiguration) {
+		this.startupConfiguration = startupConfiguration;
+	}
+
+
+	public ShardManager getJDA() {
+		return JDA;
 	}
 	
 }

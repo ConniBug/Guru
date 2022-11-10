@@ -1,10 +1,10 @@
 package com.goru.credentials;
 
+import com.guru.data.Configuration;
 import com.guru.data.SerializableField;
 
+@Configuration(folder = "auth")
 public class Credentials {
-	
-	public Credentials() {}
 
 	@SerializableField(path = "credentials.auth")
 	public String AUTH_KEY; 

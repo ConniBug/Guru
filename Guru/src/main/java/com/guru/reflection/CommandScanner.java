@@ -4,38 +4,43 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONObject;
+import org.reflections.Reflections;
 
-import com.guru.data.Configuration;
+import com.guru.bot.Guru;
+import com.guru.commands.Command;
 import com.guru.data.MemoryManagement;
 import com.guru.data.SerializableField;
 
-public class ClazzScanner {
+public class CommandScanner {
 	
-	private MemoryManagement memoryManagement;
-	
-	private final List<Object> serializableClazz = new ArrayList<>();
-	
-	public ClazzScanner(MemoryManagement memoryManagement) {
-		this.memoryManagement = memoryManagement;
-	}
-
-	
+	private final String COMMANDS_FOLDER = "commands";
 	
 	/**
-	 * push database/json values to fields that require it, only permitted to instances added via ClazzScanner#includeClassInScanner
+	 * scan all the commands in the project, instantiate them, as well as inject any values they need, then process them via the consumer.
+	 * @param consumer
 	 */
-	public void inject() {
-	
-		this.serializableClazz.forEach(clazz -> {
+	public List<Command> retrieveCommandsFromPackage(String dir) {
+
+		MemoryManagement memoryManagement = Guru.getInstance().getManagement();
+		
+		List<Command> commands = new ArrayList<>();
+		
+		Reflections reflections = new Reflections(dir);
+
+		Set<Class<? extends Command>> allClasses = reflections.getSubTypesOf(Command.class);
+		
+		allClasses.forEach(clazz -> {
 			
-			Class<?> type = clazz.getClass();
-			
-			if(type.isAnnotationPresent(Configuration.class)) {
-			
-				String folder = type.getDeclaredAnnotation(Configuration.class).folder();
-				folder = folder.length() <= 1 ? "" : folder + ".";
+			Class<? extends Command> type = clazz;
+
+			try {
+				
+				Command command = (Command)type.newInstance();
+
+				String folder = COMMANDS_FOLDER + ".";
 				
 				for(Field field : type.getDeclaredFields()){
 					
@@ -70,23 +75,17 @@ public class ClazzScanner {
 						}
 					}
 				}
-			
+				commands.add(command);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			
+			
 		});
+		
+		return commands;
 	
-	}
-	
-	/**
-	 * adds an instance to the scanner, this will allow the added class to utilize SerializableField, which will allow for value injection to variables that need it
-	 * @param object to be scanned
-	 */
-	public void includeClassInScanner(Object clazz) {
-		this.serializableClazz.add(clazz);
 	}
 
-	public MemoryManagement getMemoryManagement() {
-		return memoryManagement;
-	}
-	
 }
