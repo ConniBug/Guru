@@ -10,16 +10,18 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
-import com.goru.credentials.Credentials;
+import com.goru.logger.Logger;
 import com.guru.bot.Guru;
 import com.guru.reflection.ClazzScanner;
 
+/**
+ * responsible for variable injection
+ * @author synte
+ * @version 0.0.1
+ */
 public class MemoryManagement {
 
 	private ClazzScanner clazzScanner;
-	
-	
-	private Credentials credentials;
 
 	/**
 	 * K = Class name
@@ -28,8 +30,6 @@ public class MemoryManagement {
 	private final Map<String, JSONObject> json = new HashMap<>();
 	
 	public MemoryManagement(){
-		
-		this.credentials = new Credentials();
 		
 		try {
 		
@@ -57,7 +57,18 @@ public class MemoryManagement {
 		
 		//instantiate the reflection scanner
 		this.clazzScanner.includeClassInScanner(Guru.getInstance());
-		this.clazzScanner.includeClassInScanner(credentials);
+		this.clazzScanner.inject();
+			
+	}
+	
+	public void inject(Object... objects) {
+		
+		//instantiate the reflection scanner
+		this.clazzScanner.includeClassInScanner(Guru.getInstance());
+		
+		for(Object i : objects) {
+			this.clazzScanner.includeClassInScanner(i);
+		}
 		
 		this.clazzScanner.inject();
 			
@@ -75,10 +86,12 @@ public class MemoryManagement {
 			
 			String name = configuration.getAbsolutePath().split("configuration")[1].replace("\\", ".").substring(1).replace(".json", "");
 			
+			
 			StringBuilder data = new StringBuilder();
 			try {
 				List<String> lines = FileUtils.readLines(configuration, StandardCharsets.UTF_8);
 				lines.forEach(data::append);
+				Logger.INFO("Logged configuration > " + name + " > " + lines);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -95,19 +108,14 @@ public class MemoryManagement {
 	}
 	
 	public JSONObject retrieveJsonConfiguration(String path) {
-		return this.json.get(this.json.keySet().stream().filter(path::equals).findFirst().get());
+		return this.json.get(this.json.keySet().stream().filter(path::equalsIgnoreCase).findFirst().get());
 	}
 	
 	
 	public ClazzScanner getClazzScanner() {
 		return clazzScanner;
 	}
-	public Credentials getCredentials() {
-		return credentials;
-	}
-	public void setCredentials(Credentials credentials) {
-		this.credentials = credentials;
-	}
+
 	public void setClazzScanner(ClazzScanner clazzScanner) {
 		this.clazzScanner = clazzScanner;
 	}

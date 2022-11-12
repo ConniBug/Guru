@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import com.goru.logger.Logger;
 import com.guru.data.Configuration;
 import com.guru.data.MemoryManagement;
 import com.guru.data.SerializableField;
@@ -24,7 +25,7 @@ public class ClazzScanner {
 	
 	
 	/**
-	 * push database/json values to fields that require it, only permitted to instances added via ClazzScanner#includeClassInScanner
+	 * push json values to fields that require it, only permitted to instances added via ClazzScanner#includeClassInScanner
 	 */
 	public void inject() {
 	
@@ -43,7 +44,7 @@ public class ClazzScanner {
 						
 						if(annotation.annotationType().equals(SerializableField.class)) {
 							
-							System.out.println(type);
+							Logger.INFO("injecting to " + clazz);
 							
 							//inject data to field
 							JSONObject json = memoryManagement.retrieveJsonConfiguration(folder + type.getSimpleName());

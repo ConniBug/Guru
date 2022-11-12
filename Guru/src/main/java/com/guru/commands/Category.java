@@ -1,15 +1,21 @@
 package com.guru.commands;
 
+/*
+ * This is used to categorize the types of commands, each category is associated with an emoji
+ */
 public enum Category {
 
-	HELP(":book:");
-	
+	HELP(":book:"), HOLIDAYS(":ocean:"), MATHS(":pencil:");
+		
 	private final String emoji;
 	
 	private Category(String emoji) {
 		this.emoji = emoji;
 	}
 	
+	/**
+	 * @return the emoji string
+	 */
 	public String getEmoji() {
 		return this.emoji;
 	}

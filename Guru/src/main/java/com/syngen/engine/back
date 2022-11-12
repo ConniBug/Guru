@@ -1,0 +1,605 @@
+package com.syngen.engine;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.syngen.utils.Numbers;
+
+/**
+ * 
+ * this class takes a mathmatical expression and then simplifies it
+ * @author synte
+ * @version 0.0.1
+ * 
+ *
+ */
+public class SimplifyExpression {
+	
+	private String expression;
+	private List<String> workingOut = new ArrayList<>();
+	
+	//initialize the expression to be parsed.
+	public SimplifyExpression(String expression) {
+		this.expression = expression;
+	}
+
+	/**
+	 * Simplifies a mathmatical expression.
+	 * @return the simplified expression
+	 */
+	public String simplify() {
+
+		//make the expression more machine readable such as adding operators between coofficients and simplifying plus and minus operators
+		//for example ++ is + and -+ is -
+		this.expression = this.makeExpressionReadable(this.expression);
+
+		System.out.println("solving -> " + expression);
+		
+		String simplfied = this.applyOperation(expression)+"";
+		
+		//add the answer to the final working out
+		this.workingOut.add(simplfied);
+
+		//print the working out
+		this.workingOut.stream().distinct().forEach(i -> {
+			System.out.println("solving -> " + i);
+		});
+		
+		return simplfied;
+	}
+	
+	
+	/**
+	 * 
+	 * @param breaks down the parameters and provides the simplified expression
+	 * @return
+	 */
+	private double applyOperation(String expression) {
+
+		//if there is no open bracket, then we have simplified this expression and can pass it on the the arithmetic function which 
+		//parses expressions without brackets.
+		if(!expression.contains("(")){
+			return this.arithmetic(expression);
+		}
+		
+		//this will be used to store the expression within a bracket.
+		StringBuilder builder = new StringBuilder();
+		int brackets = 0; //amount of brackets found within the expression
+		
+		
+		for(char i : expression.toCharArray()) {
+			
+			//it's important to count the brackets as there may be nested brackets in this expression
+			//this way we can decrement the brackets value and therefore can tell when the entire expression has been found
+			if(i == '(') {
+				brackets++; 
+			}
+			
+			//if we are currently inside of the expression, append it to the builder
+			if(brackets > 0) {
+				builder.append(i+"");	
+			}
+			
+			
+			//decrement the brackets var as we located a closing bracket, if there are no nested brackets, this can mark the end of the expression
+			if(i == ')') {
+				brackets--;
+			}
+			
+			//end of an expression
+			if(brackets == 0) {
+				//avoid empty expressions as they serve no purpose.
+				if(builder.toString().trim().length() == 0) continue;
+				
+				//return the expression without the initial and end bracket.
+				String subExpressionWithoutBrackets = builder.toString().trim().substring(1).substring(0, builder.toString().length() - 2);
+				
+				//the simplified expression for this expression
+				//the expression will be constantly broken down and replaced with it's numeric counter part processed in .arithmetic()
+				//for example (4*3(4-3)+1)
+				//            (4*3*(4-3)+1)
+				//                 (4-3) 
+				//                   1
+				//            (4*3*1+1)
+				//                13
+				double value = this.applyOperation(subExpressionWithoutBrackets);
+				
+				//replace the value of this expression as the value that was calculated.
+				expression = expression.replace(builder.toString(), value+"");
+				
+
+				//update the full expression with the simplified sub expression
+				this.expression = this.expression.replace("(" + subExpressionWithoutBrackets + ")", value+"");
+
+				//add the expression to the working out
+				workingOut.add(this.expression);
+
+				//reset the string builder
+				builder.setLength(0);
+				
+			}
+			
+		}
+		
+		//subExpressions.forEach(this::applyOperation);
+		
+		return this.arithmetic(expression);
+	}
+	
+	/**
+	 * 
+	 * @param expression without brackets
+	 * @return the quotiant of an expression ( without brackets)
+	 */
+	public double arithmetic(String expression) {
+		
+		double result = 1;
+		System.out.println("sub expression -> " + expression);
+		
+		Operators highestOperator = null;
+		int indexOfTheHighestPriorityOperator = 0;
+		char[] chars = expression.toCharArray();
+		
+		//look for the highest power operator
+		for(int i = 0; i < chars.length; i++) {
+			if(Operators.getPriority(chars[i]) > Operators.getPriority(chars[indexOfTheHighestPriorityOperator])) {
+				indexOfTheHighestPriorityOperator = i;
+				highestOperator = Operators.getOperator(chars[i]);
+			}
+		}
+		
+		if(highestOperator == null && chars.length > 0) {
+			if(Operators.getPriority(chars[indexOfTheHighestPriorityOperator]) > 0) {
+				highestOperator = Operators.getOperator(chars[indexOfTheHighestPriorityOperator]);
+			}
+		}
+		
+		//Operators.getPriority(chars[indexOfTheHighestPriorityOperator]) > 0
+		//System.out.println("highest operator: " + highestOperator.getSymbol());
+		
+		if(highestOperator != null) {
+			//System.out.println("solving -> " + expression);
+			
+			String leftExpression = "";
+			String rightExpression = "";
+			
+			String ignoredRightExpression = "";
+			//double valueOfIgnoredRightExpression = 0;
+			
+			for(int i = 0; i < chars.length; i++) {
+				if(i < indexOfTheHighestPriorityOperator) {
+					
+					if(Operators.getPriority(chars[i]) > 0) {
+						
+					}
+					
+					leftExpression += chars[i];
+				}
+				if(i > indexOfTheHighestPriorityOperator) {
+					//stop the operation as we encountered a symbol with less priority
+					//for example 6 ^ 5+6 is (6^5) + 6 NOT 6 ^ (5+6)
+					//anything with a priority of 1 or more is a symbol
+					if(Operators.getPriority(chars[i]) > 0) {
+						//System.out.println("ignored " + expression.substring(i, expression.length()));
+						ignoredRightExpression = expression.substring(i, expression.length());
+						//valueOfIgnoredRightExpression = this.arithmetic(ignoredRightExpression);
+						break;
+					}
+					rightExpression += chars[i];
+				}
+			}
+			
+			result = highestOperator.compute(this.arithmetic(leftExpression), this.arithmetic(rightExpression));
+			//System.out.println("computing l + r -> " + result);
+			
+			
+			//this.expression = this.expression.replace(this.arithmetic(leftExpression) + highestOperator.getSymbol() + rightExpression, result+"");
+			//System.out.println("solving -> " + this.expression);
+			
+			String rightExpressionComputationExpression = result + ignoredRightExpression;
+			
+			//System.out.println("r -> " + rightExpressionComputationExpression);
+			
+			//System.out.println("simplifying expression -> " + leftExpression + chars[indexOfTheHighestPriorityOperator] + rightExpression + ignoredRightExpression);
+			
+			if(Numbers.isNumber(leftExpression) && Numbers.isNumber(rightExpression)) {
+				//System.out.println(leftExpression + " " + highestOperator.getSymbol() + " " + rightExpression + " = " + result);
+				
+				//this.expression = this.expression.replace(leftExpression + highestOperator.getSymbol() + rightExpression, result+"");
+				//workingOut.add(this.expression);
+			}
+			
+			double rightExpressionComputation = this.arithmetic(rightExpressionComputationExpression);
+			
+			result = rightExpressionComputation;
+			
+			//System.out.println(leftExpression + "( " + chars[indexOfTheHighestPriorityOperator] + " )" + rightExpression + ignoredRightExpression + " => " + result);
+			
+			//System.out.println(leftExpression + "( " + chars[indexOfTheHighestPriorityOperator] + " )" + ( rightExpressionComputationExpression ) + " => " + result);
+		
+		}else{
+			//very special case where only - symbol exists.
+			if(expression.contains("-")) {
+				//pretend the - is a plus, then multiply the end result by -1
+				return this.arithmetic(this.makeExpressionReadable("0+" + expression.replace("-", "+"))) * -1;
+			}
+			result = Double.parseDouble(expression);
+		}
+		
+		
+		//this.expression = this.expression.replace(expression, result+"");
+		//System.out.println("solving -> " + this.expression);
+		return result;
+	}
+	
+	public String makeExpressionReadable(String expression) {
+	
+		expression = expression.replace(")(",")*(");	
+		expression = expression.replace("+(","1*(");	
+		expression = expression.replace("-(","-1*(");	
+		for(int i = -9; i < 10; i++) {
+			expression = expression.replace(i + "(", i + "*(");	
+		}
+		
+		expression = expression.replace("++", "+");
+		expression = expression.replace("--", "+");
+		expression = expression.replace("+-", "-");
+		expression = expression.replace("-+", "-");
+		
+		expression = expression.replace(" ", "");
+		return expression;
+	}
+	
+	public static SimplifyExpression instance(String expression) {
+		return new SimplifyExpression(expression);
+	}
+	
+	
+	
+	public String randomExpression1(boolean variable, int values, int depth) {
+		
+		String expression = "";
+		int brackets = 0;
+		
+		int varaiblePos = ThreadLocalRandom.current().nextInt(values);
+		
+		for(int i = 0; i < values; i++) {
+			String subExpression = "";
+			
+			
+			//50% chance of adding a coofficient to a subexpression in diff 1
+			if(Chance.chance((double)this.DIFFICULTY / 2)) {
+				int number = this.smallInt();
+				if(number > 1) {
+					subExpression += " * " + this.smallInt();	
+				}
+			}else {
+				//if there is no multiplier add a plus or minus
+				if(Chance.chance(0.5)) {
+					subExpression += " + " + this.smallInt();	
+				}else {
+					subExpression += " - " + this.smallInt();
+				}
+			}
+			
+			if(varaiblePos == i && depth == 1 && variable) {
+				subExpression += "x";
+			}
+			
+			
+			//25% chance of adding a power to a subexpression in diff 1
+			if(Chance.chance((double)this.DIFFICULTY / 4) && !expression.isEmpty()) {
+				subExpression += "^" + this.tinyInt()+1;
+			}
+			
+			
+			//10% chance of adding a power to a subexpression in diff 1
+			if(Chance.chance(((double)this.DIFFICULTY-((depth+1)*brackets))/ 5) && !expression.isEmpty()) {
+				if(values/2 > 1) {
+					subExpression += "(" + this.randomExpression(variable, values/2, (depth+1)).substring(1) + ")";
+					i += (values/2);
+					brackets++;
+				}
+			}
+			
+			
+			expression += subExpression;
+			
+		}
+		
+		return expression.substring(2).replace(" ", "");
+		
+	}
+	
+	
+}
+
+
+
+////////////////////////////
+package com.syngen.engine;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
+import com.syngen.utils.Numbers;
+
+/**
+ * 
+ * this class takes a mathmatical expression and then simplifies it
+ * @author synte
+ * @version 0.0.1
+ * 
+ *
+ */
+public class SimplifyExpression {
+	
+	private String expression;
+	private List<String> workingOut = new ArrayList<>();
+	
+	//initialize the expression to be parsed.
+	public SimplifyExpression(String expression) {
+		this.expression = expression;
+	}
+
+	/**
+	 * Simplifies a mathmatical expression.
+	 * untill i finish mine, this will do.
+	 * @return the simplified expression
+	 */
+	public String simplify() {
+
+		//make the expression more machine readable such as adding operators between coofficients and simplifying plus and minus operators
+		//for example ++ is + and -+ is -
+		this.expression = this.makeExpressionReadable(this.expression);
+
+		System.out.println("solving -> " + expression);
+		
+		String simplfied = this.applyOperation(expression)+"";
+		
+		//add the answer to the final working out
+		this.workingOut.add(simplfied);
+
+		//print the working out
+		this.workingOut.stream().distinct().forEach(i -> {
+			System.out.println("solving -> " + i);
+		});
+		
+		return simplfied;
+	}
+	
+	
+	/**
+	 * 
+	 * @param breaks down the parameters and provides the simplified expression
+	 * @return
+	 */
+	private double applyOperation(String expression) {
+
+		//if there is no open bracket, then we have simplified this expression and can pass it on the the arithmetic function which 
+		//parses expressions without brackets.
+		if(!expression.contains("(")){
+			return this.arithmetic(expression);
+		}
+		
+		//this will be used to store the expression within a bracket.
+		StringBuilder builder = new StringBuilder();
+		int brackets = 0; //amount of brackets found within the expression
+		
+		
+		for(char i : expression.toCharArray()) {
+			
+			//it's important to count the brackets as there may be nested brackets in this expression
+			//this way we can decrement the brackets value and therefore can tell when the entire expression has been found
+			if(i == '(') {
+				brackets++; 
+			}
+			
+			//if we are currently inside of the expression, append it to the builder
+			if(brackets > 0) {
+				builder.append(i+"");	
+			}
+			
+			
+			//decrement the brackets var as we located a closing bracket, if there are no nested brackets, this can mark the end of the expression
+			if(i == ')') {
+				brackets--;
+			}
+			
+			//end of an expression
+			if(brackets == 0) {
+				//avoid empty expressions as they serve no purpose.
+				if(builder.toString().trim().length() == 0) continue;
+				
+				//return the expression without the initial and end bracket.
+				String subExpressionWithoutBrackets = builder.toString().trim().substring(1).substring(0, builder.toString().length() - 2);
+				
+				//the simplified expression for this expression
+				//the expression will be constantly broken down and replaced with it's numeric counter part processed in .arithmetic()
+				//for example (4*3(4-3)+1)
+				//            (4*3*(4-3)+1)
+				//                 (4-3) 
+				//                   1
+				//            (4*3*1+1)
+				//                13
+				double value = this.applyOperation(subExpressionWithoutBrackets);
+				
+				//replace the value of this expression as the value that was calculated.
+				expression = expression.replace(builder.toString(), value+"");
+				
+
+				//update the full expression with the simplified sub expression
+				this.expression = this.expression.replace("(" + subExpressionWithoutBrackets + ")", value+"");
+
+				//add the expression to the working out
+				workingOut.add(this.expression);
+
+				//reset the string builder
+				builder.setLength(0);
+				
+			}
+			
+		}
+		
+		//subExpressions.forEach(this::applyOperation);
+		
+		return this.arithmetic(expression);
+	}
+	
+	/**
+	 * @param expression without brackets
+	 * @return the quotiant of an expression ( without brackets)
+	 */
+	public double arithmetic1(String expression) {
+		ScriptEngineManager mgr = new ScriptEngineManager();
+	    ScriptEngine engine = mgr.getEngineByName("JavaScript");
+	    try {
+	    	System.out.println(engine.eval(expression));
+			Double d = Double.parseDouble(engine.eval(expression).toString());
+			return d;
+		} catch (ScriptException e) {
+			e.printStackTrace();
+		}
+	    return 0;
+	}
+	
+	/**
+	 * 
+	 * @param expression without brackets
+	 * @return the quotiant of an expression ( without brackets)
+	 */
+	public double arithmetic(String expression) {
+		
+		double result = 1;
+		//expression = this.makeExpressionReadable(expression);
+		//System.out.println("sub expression -> " + expression + "  : " + expression.split("-").length);
+		
+		Operators highestOperator = null;
+		int indexOfTheHighestPriorityOperator = 0;
+		char[] chars = expression.toCharArray();
+		boolean minusValue = false;
+		
+		//look for the highest power operator
+		for(int i = 0; i < chars.length; i++) {
+			if(Operators.getPriority(chars[i]) >= Operators.getPriority(chars[indexOfTheHighestPriorityOperator])) {
+				Operators current = Operators.getOperator(chars[i]);
+				if(current == Operators.SUBTRACTION && !minusValue && expression.split("-").length > 2) {
+					minusValue = true;
+					continue;
+				}
+				indexOfTheHighestPriorityOperator = i;
+				highestOperator = Operators.getOperator(chars[i]);
+			}
+		}
+		
+		if(highestOperator == null && chars.length > 0) {
+			Operators symbol = Operators.getOperator(chars[indexOfTheHighestPriorityOperator]);
+			if(symbol != null && symbol.getPriority() > 0 && symbol != Operators.SUBTRACTION && expression.split("-").length > 2) {
+				highestOperator = symbol;
+			}
+		}
+		
+		if(highestOperator != null) {
+			
+			String leftExpression = "";
+			String rightExpression = "";
+			
+			String ignoredRightExpression = "";
+			String ignoredLeftExpression = "";
+			
+			for(int i = 0; i < chars.length; i++) {
+				boolean isNegative = false;
+				//left hand side
+				if(i < indexOfTheHighestPriorityOperator) {
+					leftExpression += chars[i];
+					
+					//irrelavant data so far as it's part of a different expression
+					if(Operators.getPriority(chars[i]) > 0) {
+						ignoredLeftExpression += leftExpression;
+						leftExpression = "";
+						System.out.println("ignored (l) " + ignoredLeftExpression);
+					}
+					
+				}
+				//right hand side
+				//!(highestOperator == Operators.ADDITION && Operators.getOperator(chars[i]) != Operators.SUBTRACTION )
+				if(i > indexOfTheHighestPriorityOperator) {
+					//stop the operation as we encountered a symbol with less priority
+					//for example 6 ^ 5+6 is (6^5) + 6 NOT 6 ^ (5+6)
+					//anything with a priority of 1 or more is a symbol
+					if(Operators.getPriority(chars[i]) > 0) {
+						Operators op = Operators.getOperator(chars[i]);
+						if(op == Operators.SUBTRACTION && !isNegative && expression.split("-").length > 2) {
+							isNegative = true;
+						}else {
+							//valueOfIgnoredRightExpression = this.arithmetic(ignoredRightExpression);
+							System.out.println("ignored (r) " + expression.substring(i, expression.length()));
+							ignoredRightExpression = expression.substring(i, expression.length());	
+							break;
+						}
+					}
+					rightExpression += chars[i];
+				}
+			}
+
+			
+			//System.out.println("(l) -> " + leftExpression + " (ig) -> " + ignoredLeftExpression);
+			//System.out.println("(r) -> " + rightExpression + " (ig) -> " + ignoredRightExpression);
+			
+			result = highestOperator.compute(this.arithmetic(leftExpression), this.arithmetic(rightExpression));
+
+			if(Numbers.isNumber(leftExpression) && Numbers.isNumber(rightExpression)) {
+				
+			}
+			
+			double rightExpressionComputation = this.arithmetic(ignoredLeftExpression + result + ignoredRightExpression);
+			
+			result = rightExpressionComputation;
+
+		}else{
+			//very special case where only one '-' symbol exists.
+			if(expression.contains("-")) {
+				return this.arithmetic(expression);
+			}
+			result = Double.parseDouble(expression);
+		}
+		
+		
+		//this.expression = this.expression.replace(expression, result+"");
+		//System.out.println("solving -> " + this.expression);
+		return result;
+	}
+	
+	public String makeExpressionReadable(String expression) {
+	
+		expression = expression.replace(")(",")*(");	
+		expression = expression.replace("+(","1*(");	
+		expression = expression.replace("-(","-1*(");	
+		for(int i = -9; i < 10; i++) {
+			expression = expression.replace(i + "(", i + "*(");	
+			expression = expression.replace(")" + i, ")*" + i);	
+		}
+		
+		expression = expression.replace("++", "+");
+		expression = expression.replace("--", "+");
+		expression = expression.replace("+-", "-");
+		expression = expression.replace("-+", "-");
+		
+		//expression = expression.replace("-", "+-");
+		
+		expression = expression.replace(" ", "");
+		return expression;
+	}
+	
+	public static SimplifyExpression instance(String expression) {
+		return new SimplifyExpression(expression);
+	}
+	
+}
+
