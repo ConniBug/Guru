@@ -34,6 +34,23 @@ public class PrettyString {
 		return alts.trim();
 	}
 	
+	public static <T> String prettyArray(T[] arr, String prefix, boolean formatString, boolean newLine) {
+		String alts = "";
+		
+		for(Object i : arr.clone()) {
+			alts += prefix + i + " ";
+			if(newLine) {
+				alts += System.lineSeparator();
+			}
+		}
+		
+		if(formatString) {
+			return capitaliseFirstLetter(alts.trim());
+		}
+		
+		return alts.trim();
+	}
+	
 	public static <T> String prettyArray(T[] arr, String prefix) {
 		String alts = "";
 		
@@ -52,5 +69,7 @@ public class PrettyString {
 		return prettyArray(arr, "");
 	}
 	
+	
+
 	
 }

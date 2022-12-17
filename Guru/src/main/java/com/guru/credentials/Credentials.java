@@ -1,4 +1,4 @@
-package com.goru.credentials;
+package com.guru.credentials;
 
 import com.guru.data.Configuration;
 import com.guru.data.SerializableField;

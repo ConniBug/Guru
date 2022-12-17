@@ -9,5 +9,9 @@ public class Numbers {
 		}catch (Exception e) {}
 		return false;
 	}
+	
+	public static int getNumber(String num) {
+		return Integer.parseInt(num);
+	}
 
 }

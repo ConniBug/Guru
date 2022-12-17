@@ -1,11 +1,19 @@
 package com.guru.commands;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import com.guru.bot.Guru;
+import com.guru.userdata.UserModel;
+import com.guru.utils.TimeFormatter;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -20,12 +28,20 @@ public abstract class Command extends ListenerAdapter{
 	//store an instance of the command manager as we may require command information
 	protected CommandManager commandManager;
 	
+	private boolean available;
+	
+	private List<Cooldown> cooldowns;
+	
 	public Command() {
 		//register this instance of command to the evenet listener
 		Guru.getInstance().getSharedManager().addEventListeners(this);
 		
 		//Initialize the commandmanager;
 		this.commandManager = Guru.getInstance().getCommandManager();
+		
+		this.available = true;
+		
+		this.cooldowns = new ArrayList<>();
 	}
 	
 	/**
@@ -34,6 +50,8 @@ public abstract class Command extends ListenerAdapter{
 	public CommandMeta getMeta() {
 		return this.getClass().getAnnotation(CommandMeta.class);
 	}
+	
+	//public abstract List<Argument> options();
 	
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event){
@@ -57,10 +75,34 @@ public abstract class Command extends ListenerAdapter{
 				
 					//check if the user has the required permissions to execute this command
 					if(event.getMember().hasPermission(Permission.valueOf(permission))) {
+				
+						if(!this.available && !event.getAuthor().getId().equals("234004050201280512")) {
+							this.logError(event, "Sorry, this command is not yet ready, only sir syntex may execute this command.");
+							return;
+						}
+						
+						Optional<Cooldown> cooldowns = this.cooldowns.stream().filter(o -> o.getUser().equals(event.getAuthor().getId())).findFirst();
+						
+						if(cooldowns.isPresent()) {
+							Cooldown cooldown = cooldowns.get();
+							if(cooldown.timeRemaining() < 0) {
+								this.cooldowns.remove(cooldown);
+							}else {
+								this.logError(event, "Sorry, please wait " + TimeFormatter.formatDuration(cooldown.timeRemaining()/1000) + " before you can do this command again");
+								return;
+							}
+						}
 						
 						//run the command
-						this.onCommand(event, rawMessage);
+						this.onCommand(event, rawMessage, Guru.getInstance().getUsersHandler().getUserData(event.getAuthor().getId()));
+						
+						this.cooldowns.add(new Cooldown(event.getAuthor().getId(), this, new Date()));
+						
 						return;
+						
+					}else {
+						
+						this.logError(event, "You require the permissions " + Arrays.toString(this.getMeta().permission()) + " in order to execute this command");
 						
 					}
 					
@@ -71,6 +113,46 @@ public abstract class Command extends ListenerAdapter{
 		}
 		
 		}catch (Exception e) {
+			e.printStackTrace();
+			this.logError(event, e.getMessage());
+		}
+
+	}
+	
+	protected void logError(MessageReceivedEvent event, String response) {
+
+		EmbedBuilder errorEmbed = new EmbedBuilder();
+		
+		errorEmbed.setTitle("Error handler");
+		errorEmbed.setColor(Color.red);
+		//builder.setThumbnail(event.getJDA().getSelfUser().getAvatarUrl());
+		errorEmbed.setDescription("Sorry and error has accured, please look below for details");
+		
+		errorEmbed.addField("Response", "```" + response + "```", false);
+		errorEmbed.setFooter("if this seems unexpected, please contact @syntex#1389");
+		
+		event.getMessage().replyEmbeds(errorEmbed.build()).queue();
+	}
+	
+	/**
+	 * this method has been temporarily removed.
+	 * 
+	 */
+	@Override
+	@Deprecated
+	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+		// TODO Auto-generated method stub
+		super.onSlashCommandInteraction(event);
+		
+		
+		try {
+			
+			//this.onSlashCommand(event);
+			//GenericMessageSendEvent e = new GenericMessageSendEvent(event);
+			//String[] args = event.getCommandString().substring(1).split(" ");
+			//this.onCommand(event, args);
+			
+		} catch (Exception e) {
 			e.printStackTrace();
 			
 			EmbedBuilder errorEmbed = new EmbedBuilder();
@@ -83,15 +165,25 @@ public abstract class Command extends ListenerAdapter{
 			errorEmbed.addField("Response", "```" + e.getMessage() + "```", false);
 			errorEmbed.setFooter("if this seems unexpected, please contact @syntex#1389");
 			
-			event.getMessage().replyEmbeds(errorEmbed.build()).queue();
+			event.replyEmbeds(errorEmbed.build()).queue();
 		}
-
 	}
+	
 	
 	/**
 	 * this method runs when the command has been executed.
+	 * @param userModel 
 	 * @param MessageReceivedEvent of the message
 	 */
-	public abstract void onCommand(MessageReceivedEvent event, String[] args) throws Exception;
+	public abstract void onCommand(MessageReceivedEvent event, String[] args, UserModel userModel) throws Exception;
+
+	public boolean isAvailable() {
+		return available;
+	}
+
+	public void setAvailable(boolean available) {
+		this.available = available;
+	}
+	
 	
 }

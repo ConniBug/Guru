@@ -10,11 +10,11 @@ import java.util.Set;
 import org.json.JSONObject;
 import org.reflections.Reflections;
 
-import com.goru.logger.Logger;
 import com.guru.bot.Guru;
 import com.guru.commands.Command;
 import com.guru.data.MemoryManagement;
 import com.guru.data.SerializableField;
+import com.guru.logger.Logger;
 
 public class CommandScanner {
 	

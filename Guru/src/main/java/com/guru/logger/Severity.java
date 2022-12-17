@@ -1,4 +1,4 @@
-package com.goru.logger;
+package com.guru.logger;
 
 public enum Severity {
 	

@@ -2,6 +2,8 @@ package com.guru.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +12,8 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
-import com.goru.logger.Logger;
 import com.guru.bot.Guru;
+import com.guru.logger.Logger;
 import com.guru.reflection.ClazzScanner;
 
 /**
@@ -22,6 +24,7 @@ import com.guru.reflection.ClazzScanner;
 public class MemoryManagement {
 
 	private ClazzScanner clazzScanner;
+	private File res;
 
 	/**
 	 * K = Class name
@@ -30,16 +33,19 @@ public class MemoryManagement {
 	private final Map<String, JSONObject> json = new HashMap<>();
 	
 	public MemoryManagement(){
-		
+		this.load();
+	}
+
+	public void load() {
 		try {
-		
+			
 		//load default json files
 		File path = new File(MemoryManagement.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
-		File res = new File(path, "configuration");
+		this.res = new File(path, "configuration");
 		
 		if(path.getAbsolutePath().contains("target")) {
 			//res = new File(this.getClass().getResource("/configuration").getFile());
-			res = new File("C:\\Users\\synte\\Desktop\\test123\\configuration");
+			this.res = new File("C:\\Users\\synte\\Desktop\\test123\\configuration");
 		}
 		
 		this.addJsonFiles(res);
@@ -50,7 +56,6 @@ public class MemoryManagement {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
 	}
 	
 	public void inject() {
@@ -76,7 +81,7 @@ public class MemoryManagement {
 	
 	public void addJsonFiles(File res) {
 		
-		//System.out.println("Processing " + res.getAbsoluteFile());
+		System.out.println("Processing " + res.getAbsoluteFile());
 		
 		for(File configuration : res.listFiles()) {
 			if(configuration.isDirectory()) {
@@ -107,8 +112,82 @@ public class MemoryManagement {
 		return json;
 	}
 	
+	public void AddConfigurationIfNeeded(Object clazz, String path) {
+		
+		try {
+		
+		if(!this.contains(path)) {
+			
+			System.err.println("configuration for " + path + " does not exist");
+			
+			//create the json folder path
+			
+			File file = res;
+			
+			for(String dir : path.split("[.]")) {
+				file = new File(file, dir);
+			}
+			
+			file = new File(file.getParent(), file.getName() + ".json");
+			
+			System.err.println("Creating file: " + file.getAbsolutePath());
+			
+			file.getParentFile().mkdirs();
+			file.createNewFile();
+			
+			JSONObject json = new JSONObject();
+			
+			JSONObject temp;
+			
+			for(Field field : clazz.getClass().getDeclaredFields()){
+				
+				Object value = field.get(clazz);
+				temp = new JSONObject();
+				
+				for(Annotation annotation : field.getAnnotations()){
+					
+					if(annotation.annotationType().equals(SerializableField.class)) {
+						
+						SerializableField serializableField = (SerializableField)annotation;
+						
+						String pathOfField = serializableField.path();
+						String[] dirs = pathOfField.split("[.]");
+						
+						String p = (dirs.length == 0) ? pathOfField : dirs[dirs.length - 1];
+						
+						for(int i = 0; i < dirs.length - 1; i++) {
+							JSONObject route = temp;
+							json.put(dirs[i], route);
+							temp = route;
+						}
+						
+						temp.put(p, value);
+						
+						
+						System.out.println("want to set value " + pathOfField + " to " + file.getAbsolutePath() + " the key is " + p);
+						System.out.println(json);
+						
+					}
+				}
+			}
+			
+			System.exit(0);
+			
+		}
+		
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
 	public JSONObject retrieveJsonConfiguration(String path) {
 		return this.json.get(this.json.keySet().stream().filter(path::equalsIgnoreCase).findFirst().get());
+	}
+	
+	public boolean contains(String path) {
+		return this.json.keySet().stream().filter(path::equalsIgnoreCase).count() > 0;
 	}
 	
 	
@@ -118,6 +197,14 @@ public class MemoryManagement {
 
 	public void setClazzScanner(ClazzScanner clazzScanner) {
 		this.clazzScanner = clazzScanner;
+	}
+
+	public File getRes() {
+		return res;
+	}
+
+	public void setRes(File res) {
+		this.res = res;
 	}
 
 	

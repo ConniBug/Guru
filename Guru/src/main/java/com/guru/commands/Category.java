@@ -5,7 +5,7 @@ package com.guru.commands;
  */
 public enum Category {
 
-	HELP(":book:"), HOLIDAYS(":ocean:"), MATHS(":pencil:");
+	HELP(":book:"), HOLIDAYS(":ocean:"), MATHS(":pencil:"), CODEWARS(":computer:"), ADMIN(":tools:"), MONEY(":moneybag:");
 		
 	private final String emoji;
 	

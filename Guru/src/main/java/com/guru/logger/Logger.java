@@ -1,4 +1,4 @@
-package com.goru.logger;
+package com.guru.logger;
 
 import java.util.ArrayList;
 import java.util.List;

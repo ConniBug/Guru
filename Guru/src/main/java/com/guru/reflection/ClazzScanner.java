@@ -7,10 +7,10 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-import com.goru.logger.Logger;
 import com.guru.data.Configuration;
 import com.guru.data.MemoryManagement;
 import com.guru.data.SerializableField;
+import com.guru.logger.Logger;
 
 public class ClazzScanner {
 	
@@ -28,7 +28,7 @@ public class ClazzScanner {
 	 * push json values to fields that require it, only permitted to instances added via ClazzScanner#includeClassInScanner
 	 */
 	public void inject() {
-	
+		
 		this.serializableClazz.forEach(clazz -> {
 			
 			Class<?> type = clazz.getClass();
@@ -46,8 +46,13 @@ public class ClazzScanner {
 							
 							Logger.INFO("injecting to " + clazz);
 							
+							
+							String dir = folder + type.getSimpleName().toLowerCase();
+							
 							//inject data to field
-							JSONObject json = memoryManagement.retrieveJsonConfiguration(folder + type.getSimpleName());
+							memoryManagement.AddConfigurationIfNeeded(clazz, dir);
+							
+							JSONObject json = memoryManagement.retrieveJsonConfiguration(dir);
 							
 							SerializableField fieldData = (SerializableField)annotation;
 							

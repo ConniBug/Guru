@@ -1,21 +1,15 @@
 package com.guru.data;
 
-import com.guru.bot.Guru;
-
 import net.dv8tion.jda.api.OnlineStatus;
 
 @Configuration
 public class StartupConfiguration {
 	
-	public StartupConfiguration() {
-		Guru.getInstance().getManagement().getClazzScanner().includeClassInScanner(this);
-	}
-
 	@SerializableField(path = "profile.status")
-	private OnlineStatus status;
+	private final OnlineStatus status = OnlineStatus.DO_NOT_DISTURB;
 	
 	@SerializableField(path = "configuration.prefix")
-	private String command_prefix;
+	private final String command_prefix = ";";
 
 	
 	public OnlineStatus getStatus() {

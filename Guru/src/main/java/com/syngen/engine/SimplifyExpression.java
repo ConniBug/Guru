@@ -415,6 +415,10 @@ public class SimplifyExpression {
 		//expression = expression.replace("-", "+-");
 		
 		expression = expression.replace(" ", "");
+		
+		expression = expression.replace("e", Math.E+"");
+		expression = expression.replace("pi", Math.PI+"");
+		
 		return expression.trim();
 	}
 	
