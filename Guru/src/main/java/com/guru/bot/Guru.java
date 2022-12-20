@@ -10,27 +10,34 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 
+/**
+ * core class, instantiates the jda instance, and loads everything up
+ * @author synte
+ *
+ */
 public class Guru {
 
 	//always keep an instance of the main program, for convenience.
-	private static final Guru instance = new Guru();
+	private static Guru instance;
 	
 	
 	//sub programs
-	private DefaultShardManagerBuilder sharedManager;
-	private MemoryManagement management;
-	private CommandManager commandManager;
-	private Credentials credentials;
-	private UsersHandler usersHandler;
+	private final DefaultShardManagerBuilder sharedManager;
+	private final MemoryManagement management;
+	private final CommandManager commandManager;
+	private final Credentials credentials;
+	private final UsersHandler usersHandler;
 	
 	private ShardManager JDA;
 	
-	private StartupConfiguration startupConfiguration;
+	private final StartupConfiguration startupConfiguration;
 	
 	/**
-	 * this initializes the program instance.
+	 * this initialises the program instance.
 	 */
-	public void launch() {
+	public Guru() {
+		
+		Guru.instance = this;
 
 		this.management = new MemoryManagement();
 		this.credentials = new Credentials();
@@ -38,29 +45,38 @@ public class Guru {
 		this.startupConfiguration = new StartupConfiguration();
 
 		this.management.inject(credentials, startupConfiguration);
-
+		
+		//instantiate the jda instance, this is done to login to discord
 		this.sharedManager = DefaultShardManagerBuilder
 							 		.createDefault(this.credentials.AUTH_KEY)
 							 		.setStatus(this.startupConfiguration.getStatus())
 							 		.enableIntents(GatewayIntent.MESSAGE_CONTENT);
 		
 		
-		this.setUsersHandler(new UsersHandler(this.management));
+		this.usersHandler = new UsersHandler(this.management);
 		this.usersHandler.loadUserData();
 		
 		this.commandManager = new CommandManager();
 		this.commandManager.loadCommands();
 		
 		this.sharedManager.addEventListeners(this.commandManager);
-		
-		//System.exit(0);
-		JDA = this.sharedManager.build();
-		
+	}
+	
+	public void start() {
+		this.JDA = this.sharedManager.build();
 	}
 	
 	
+	/**
+	 * returns an instance of this class
+	 * @return an instance of this class, as this is a singleton instantiating more than one class should not be needed
+	 */
 	public static Guru getInstance() {
-		return instance;
+		return Guru.instance;
+	}
+	
+	public static void setGuru(Guru guru) {
+		Guru.instance = guru;
 	}
 
 	public MemoryManagement getManagement() {
@@ -80,27 +96,6 @@ public class Guru {
 		return commandManager;
 	}
 
-
-	public void setCommandManager(CommandManager commandManager) {
-		this.commandManager = commandManager;
-	}
-
-
-	public void setSharedManager(DefaultShardManagerBuilder sharedManager) {
-		this.sharedManager = sharedManager;
-	}
-
-
-	public void setManagement(MemoryManagement management) {
-		this.management = management;
-	}
-
-
-	public void setStartupConfiguration(StartupConfiguration startupConfiguration) {
-		this.startupConfiguration = startupConfiguration;
-	}
-
-
 	public ShardManager getJDA() {
 		return JDA;
 	}
@@ -110,9 +105,5 @@ public class Guru {
 		return usersHandler;
 	}
 
-
-	public void setUsersHandler(UsersHandler usersHandler) {
-		this.usersHandler = usersHandler;
-	}
 	
 }

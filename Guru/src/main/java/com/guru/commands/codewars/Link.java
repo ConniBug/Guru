@@ -22,10 +22,10 @@ public class Link extends Command{
 	@Override
 	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
 		
-		System.out.println(args.length);
+		System.out.println(args.length + " -> " + args[1]);
 		
-		if(args.length == 1) {
-			throw new Exception("usage: " + this.getMeta().usage()[0]);
+		if(args.length == 1 || !args[1].startsWith("https://www.codewars.com/users/")) {
+			throw new Exception("please do ;link https://www.codewars.com/users/{YOURNAME}");
 		}
 		
 		StringBuilder name = new StringBuilder();
@@ -39,13 +39,13 @@ public class Link extends Command{
 		embedBuilder.setColor(Color.orange);
 		embedBuilder.setThumbnail(event.getJDA().getSelfUser().getAvatarUrl());
 		
-		embedBuilder.addField("Verification pending...", "We saved your codewars name/url, once approved your account will be linked to the specified codewars account.", false);
+		embedBuilder.addField("Verification pending...", "We saved your codewars url, once approved your account will be linked to the specified codewars account.", false);
 
 		embedBuilder.setFooter("for anyone rated kyu 4+ we may ask further questions to ensure it's really you.");
 		
 		event.getMessage().replyEmbeds(embedBuilder.build()).queue();
 		
-		model.createCodeWarsLink(name.toString());
+		model.createCodeWarsLink(name.toString().trim());
 		model.save();
 		
 	}

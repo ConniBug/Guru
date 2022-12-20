@@ -45,7 +45,7 @@ public class MemoryManagement {
 		
 		if(path.getAbsolutePath().contains("target")) {
 			//res = new File(this.getClass().getResource("/configuration").getFile());
-			this.res = new File("C:\\Users\\synte\\Desktop\\test123\\configuration");
+			this.res = new File("C:\\Users\\synte\\OneDrive - University of Kent\\Desktop\\test123\\configuration");
 		}
 		
 		this.addJsonFiles(res);
@@ -69,9 +69,11 @@ public class MemoryManagement {
 	public void inject(Object... objects) {
 		
 		//instantiate the reflection scanner
+		Logger.INFO("Added " + Guru.getInstance().getClass() + " to the scanner.");
 		this.clazzScanner.includeClassInScanner(Guru.getInstance());
 		
 		for(Object i : objects) {
+			//Logger.INFO("Added " + i.getClass() + " to the scanner.");
 			this.clazzScanner.includeClassInScanner(i);
 		}
 		

@@ -3,35 +3,49 @@ package com.guru.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Utility class to create/manga maps more easily
+/** Utility class to create maps easily
  * @author syntex (saif khan) 
- * @author https://github.com/F12-Syntex?tab=repositories
  * @version 1.0
  * @since 1.0
 */
 public class MapUtils<K, V> {
 
-	private Map<K, V> map; //store the current state of the Map
+	private Map<K, V> map; 
 	
-	/* Constructor */
+	/**
+	 * 
+	 * @param key the first key value
+	 * @param value the first value for the key
+	 */
 	public MapUtils(K key, V value) {
 		 this.map = new HashMap<>();
 		 this.map.put(key, value);
 	}
 	
-	/* Constructor */
+	/**
+	 * 
+	 * @param key add a key to the map
+	 * @param value add a value for the key provided
+	 * @return an instance of this maputils
+	 */
 	public MapUtils<K, V> put(K key, V value) {
 		this.map.put(key, value);
 		return this;
 	}
 	
-	/* @returns the current Map<K, V> */
+	/**
+	 * retrieve this utils as a map
+	 * @return return the map which this instance represents
+	 */
 	public Map<K, V> get(){
 		return this.map;
 	}
 	
-	/* @returns an empty HashMap<K, V> */
-	public Map<K, V> empty(){
+	/**
+	 * returns an empty hashmap
+	 * @return
+	 */
+	public static <K, V> Map<K, V> empty(){
 		return new HashMap<>();
 	}
 	

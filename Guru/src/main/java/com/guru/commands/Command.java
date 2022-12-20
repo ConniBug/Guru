@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.guru.bot.Guru;
+import com.guru.reflection.CommandScanner;
 import com.guru.userdata.UserModel;
 import com.guru.utils.TimeFormatter;
 
@@ -45,7 +46,9 @@ public abstract class Command extends ListenerAdapter{
 	}
 	
 	/**
+	 * these fields are checked during runtime by the command scanner reflections class
 	 * @return meta information for this command, defined in the commandmeta annotation for the class
+	 * @see CommandScanner#retrieveCommandsFromPackage(String)
 	 */
 	public CommandMeta getMeta() {
 		return this.getClass().getAnnotation(CommandMeta.class);
@@ -76,13 +79,18 @@ public abstract class Command extends ListenerAdapter{
 					//check if the user has the required permissions to execute this command
 					if(event.getMember().hasPermission(Permission.valueOf(permission))) {
 				
+						//only let me ( syntex ) do the command if the command is not available
 						if(!this.available && !event.getAuthor().getId().equals("234004050201280512")) {
 							this.logError(event, "Sorry, this command is not yet ready, only sir syntex may execute this command.");
 							return;
 						}
 						
-						Optional<Cooldown> cooldowns = this.cooldowns.stream().filter(o -> o.getUser().equals(event.getAuthor().getId())).findFirst();
+						//retrieve the cooldown for the user if any
+						Optional<Cooldown> cooldowns = this.cooldowns.stream().filter(o -> o.getUserID().equals(event.getAuthor().getId())).findFirst();
 						
+						//prevent usage of this command if a cooldown exists, remove the cooldown
+						//if the cooldown is below 0, as we add a cooldown whenever the commmand
+						//is executed
 						if(cooldowns.isPresent()) {
 							Cooldown cooldown = cooldowns.get();
 							if(cooldown.timeRemaining() < 0) {
@@ -96,6 +104,7 @@ public abstract class Command extends ListenerAdapter{
 						//run the command
 						this.onCommand(event, rawMessage, Guru.getInstance().getUsersHandler().getUserData(event.getAuthor().getId()));
 						
+						//add the cooldown
 						this.cooldowns.add(new Cooldown(event.getAuthor().getId(), this, new Date()));
 						
 						return;
@@ -119,13 +128,17 @@ public abstract class Command extends ListenerAdapter{
 
 	}
 	
+	/**
+	 * a convenient error message sender, which uses a premade error template and then sends out the error
+	 * @param event
+	 * @param response
+	 */
 	protected void logError(MessageReceivedEvent event, String response) {
 
 		EmbedBuilder errorEmbed = new EmbedBuilder();
 		
 		errorEmbed.setTitle("Error handler");
 		errorEmbed.setColor(Color.red);
-		//builder.setThumbnail(event.getJDA().getSelfUser().getAvatarUrl());
 		errorEmbed.setDescription("Sorry and error has accured, please look below for details");
 		
 		errorEmbed.addField("Response", "```" + response + "```", false);
@@ -177,10 +190,18 @@ public abstract class Command extends ListenerAdapter{
 	 */
 	public abstract void onCommand(MessageReceivedEvent event, String[] args, UserModel userModel) throws Exception;
 
+	/**
+	 * wether or not this command can be used by normal users
+	 * @return <code>true</code> if usable otherwise <code>false</code>
+	 */
 	public boolean isAvailable() {
 		return available;
 	}
 
+	/**
+	 * sets the W of this bot
+	 * @param available, wether or not this command is available
+	 */
 	public void setAvailable(boolean available) {
 		this.available = available;
 	}

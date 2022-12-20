@@ -13,7 +13,7 @@ import com.guru.utils.Network;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-@CommandMeta(name = {"cstats", "cprofile", "codewarsstats"}, description = "Displays a users codewars stats", category = Category.CODEWARS, usage = {"cstats <user>"})
+@CommandMeta(name = {"cstats", "cprofile", "codewarsstats"}, description = "Displays a users codewars stats", category = Category.CODEWARS, usage = {"cstats", "cstats <user>"})
 public class Stats extends Command{
 
 	@Override
@@ -21,20 +21,26 @@ public class Stats extends Command{
 		
 		System.out.println(args.length);
 		
-		if(args.length == 1) {
-			throw new Exception("usage: " + this.getMeta().usage()[0]);
-		}
-		
 		StringBuilder name = new StringBuilder();
 		
-		for(int i = 1; i < args.length; i++) {
-			name.append(args[i] + " ");
+		String json = "";
+		
+		if(args.length == 1) {
+			if(model.getCodewars().isEmpty()) {
+				this.logError(event, "Sorry, you don't have a codewars profile linked please do ;link {profile} if you've already linked your account, please wait for a developer to verify your status.");
+				return;
+			}
+			//System.out.println("https://www.codewars.com/api/v1/users/" + model.getCodewars().split("users/")[1]);
+			json = Network.readURL("https://www.codewars.com/api/v1/users/" + model.getCodewars().split("users/")[1]);
+		}else {
+			for(int i = 1; i < args.length; i++) {
+				name.append(args[i] + " ");
+			}
+			json = Network.readURL("https://www.codewars.com/api/v1/users/" + name.toString().trim().replace(" ", "%20").trim());
 		}
 		
-		String json = Network.readURL("https://www.codewars.com/api/v1/users/" + name.toString().trim().replace(" ", "%20"));
-		
-		//System.out.println(json);
-		
+		System.out.println(json);
+
 		JSONObject obj = new JSONObject(json);
 
 		EmbedBuilder embedBuilder = new EmbedBuilder();

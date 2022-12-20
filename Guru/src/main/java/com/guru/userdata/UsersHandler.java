@@ -16,6 +16,8 @@ import com.google.gson.GsonBuilder;
 import com.guru.data.MemoryManagement;
 import com.guru.logger.Logger;
 
+import net.dv8tion.jda.api.entities.User;
+
 public class UsersHandler {
 
 	private Set<UserModel> users = new HashSet<>();
@@ -73,6 +75,15 @@ public class UsersHandler {
 		this.users.add(user);
 
 		return user;
+	}
+	
+	/**
+	 * returns the user data from the users
+	 * @param the user
+	 * @return
+	 */
+	public UserModel getUserData(User user) {
+		return this.getUserData(user.getId());
 	}
 	
 	/**

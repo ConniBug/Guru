@@ -44,8 +44,6 @@ public class BalanceTop extends Command{
 			balance.addField(event.getJDA().retrieveUserById(user.getUserID()).complete().getName() + "\t#" + (i+1), "```" + user.getBablons() + " " + "bablons```", true);			
 		}
 		
-		//balance.addField("Bablons", "```" +userData.getBablons()+"```", true);
-		
 		event.getMessage().replyEmbeds(balance.build()).queue();
 		
 	}

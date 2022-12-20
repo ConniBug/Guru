@@ -64,6 +64,7 @@ public class UserModel {
 	}
 	
 	public void createCodeWarsLink(String link) {
+		this.link.clear();
 		this.link.add(link);
 	}
 	

@@ -2,40 +2,61 @@ package com.guru.commands;
 
 import java.util.Date;
 
-public class Cooldown {
+import javax.annotation.Nonnull;
 
-	private String user;
-	private Date startTime;
-	private Command command;
+/**
+ * Immutable class which represents a cooldown.
+ * @author synte
+ */
+public final class Cooldown {
+
+	private final String userID;
+	private final Date startTime;
+	private final Command command;
 	
-	public Cooldown(String user, Command command, Date startTime) {
-		this.user = user;
+	public Cooldown(@Nonnull String user, @Nonnull Command command, @Nonnull Date startTime) {
+		this.userID = user;
 		this.startTime = startTime;
 		this.command = command;
 	}
 	
-	public String getUser() {
-		return user;
+	/**
+	 * retrieve the user who is attached to this cooldown
+	 * @return the user who this cooldown applies to
+	 */
+	public String getUserID() {
+		return userID;
 	}
-	public void setUser(String user) {
-		this.user = user;
-	}
+	
+	/**
+	 * the Date when this cooldown was created
+	 * @return the creation time for this cooldown
+	 */
 	public Date getStartTime() {
 		return startTime;
 	}
-	public void setStartTime(Date startTime) {
-		this.startTime = startTime;
+	
+	/**
+	 * return the command which is this cooldown applies to
+	 * @return the command
+	 */
+	public Command getCommand() {
+		return this.command;
 	}
 	
+	/**
+	 * finds the amount of time that this cooldown has remaining till the cooldown expires
+	 * can be negative which represents duration over the cooldown
+	 * @return the amount of time remaining for this cooldown in milliseconds
+	 */
 	public long timeRemaining() {
 		
-		long time = this.command.getMeta().cooldown();
+		long cooldownDuration = this.command.getMeta().cooldown();
 		
-		Date current = new Date();
+		Date currentTime = new Date();
 		
-		long milli = (startTime.getTime() + (time*1000)) - current.getTime();
-		
-		System.out.println(milli);
+		long endTime = startTime.getTime() + (cooldownDuration*1000);
+		long milli = endTime - currentTime.getTime();
 		
 		return milli;
 	}

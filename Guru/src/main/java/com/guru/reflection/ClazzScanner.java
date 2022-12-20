@@ -31,6 +31,8 @@ public class ClazzScanner {
 		
 		this.serializableClazz.forEach(clazz -> {
 			
+			Logger.INFO("scanning " + clazz);
+			
 			Class<?> type = clazz.getClass();
 			
 			if(type.isAnnotationPresent(Configuration.class)) {

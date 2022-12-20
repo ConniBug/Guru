@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import com.guru.logger.Logger;
 import com.guru.reflection.CommandScanner;
 
@@ -57,10 +59,15 @@ public final class CommandManager extends ListenerAdapter{
 				}
 			}
 		}
-		duplicates.forEach(o -> {
-			System.err.println("duplicate command -> " + Arrays.toString(o.getMeta().name()) + " from " + o.getClass().getName());
-		});
-		if(duplicates.size() > 0) System.exit(0);
+		
+		if(duplicates.size() > 0) {
+			System.exit(0);
+		}else {
+			duplicates.forEach(o -> {
+				System.err.println("duplicate command -> " + Arrays.toString(o.getMeta().name()) + " from " + o.getClass().getName());
+			});	
+		}
+		
 		
 		
 	}
@@ -77,12 +84,17 @@ public final class CommandManager extends ListenerAdapter{
 	 * @return the command if exists
 	 * @param the class of the command
 	 */
-	public Optional<Command> getCommandByClass(Class<Command> clazz) {
+	public Optional<Command> getCommandByClass(@Nonnull Class<Command> clazz) {
 		return this.commands.stream().filter(i -> i.getClass() == clazz).findFirst();
 	}
 	
 
-	public Optional<Command> getCommandByName(String alt) {
+	/**
+	 * return the command if any by it's name
+	 * @param alt, one of the names for this command
+	 * @return
+	 */
+	public Optional<Command> getCommandByName(@Nonnull String alt) {
 		for(Command i : this.commands) {
 			for(String o : i.getMeta().name()) {
 				if(o.equalsIgnoreCase(alt)) {
@@ -98,11 +110,7 @@ public final class CommandManager extends ListenerAdapter{
 	 * @param category of all the returned commands
 	 * @return
 	 */
-	public List<Command> getCatergoryCommands(Category category) {
-		//create a command stream
-		//filter all commands whos category is equal to the parameter category
-		//collect all values in the pipeline to an arraylist
-		//return the arraylist
+	public List<Command> getCatergoryCommands(@Nonnull Category category) {
 		return commands.stream().filter(o -> o.getMeta().category() == category).collect(Collectors.toList());
 	}
 	

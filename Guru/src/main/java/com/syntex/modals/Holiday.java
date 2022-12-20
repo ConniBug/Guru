@@ -1,12 +1,24 @@
 package com.syntex.modals;
 
-public class Holiday {
+/**
+ * 
+ * Immutable class which represents a holiday
+ * @author synte
+ *
+ */
+public final class Holiday {
 
-	private String startDate;
-	private String endDate;
+	private final String startDate;
+	private final String endDate;
 	
 	private String name;
 
+	/**
+	 * 
+	 * @param startDate the start date for this holiday
+	 * @param endDate the end date for this holiday
+	 * @param name the name for this holiday
+	 */
 	public Holiday(String startDate, String endDate, String name) {
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -17,16 +29,8 @@ public class Holiday {
 		return startDate;
 	}
 
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
-
 	public String getEndDate() {
 		return endDate;
-	}
-
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
 	}
 
 	public String getName() {
