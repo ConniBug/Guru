@@ -11,9 +11,11 @@ import org.apache.commons.io.FileUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.guru.bot.Guru;
+import com.guru.codewars.modals.CodewarsUserProfile;
 import com.guru.commands.shop.Transaction;
 import com.guru.commands.shop.TransactionType;
 import com.guru.logger.Logger;
+import com.guru.utils.Network;
 
 public class UserModel {
 
@@ -61,6 +63,7 @@ public class UserModel {
 		this.transactions = transactions;
 		this.link = link;
 		this.codewars = codewars;
+		
 	}
 	
 	public void createCodeWarsLink(String link) {
@@ -154,6 +157,17 @@ public class UserModel {
 
 		  return result.toString();
 		}
+	public CodewarsUserProfile getCodewarsProfile() {
+		
+		String url = "https://www.codewars.com/api/v1/users/" + this.codewars.split("users/")[1];
+		String json = Network.readURL(url);
+		
+		Gson gson = new Gson();
+		
+		CodewarsUserProfile profile = gson.fromJson(json, CodewarsUserProfile.class);
+		
+		return profile;
+	}
 	
 	
 	

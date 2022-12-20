@@ -61,11 +61,10 @@ public final class CommandManager extends ListenerAdapter{
 		}
 		
 		if(duplicates.size() > 0) {
-			System.exit(0);
-		}else {
 			duplicates.forEach(o -> {
 				System.err.println("duplicate command -> " + Arrays.toString(o.getMeta().name()) + " from " + o.getClass().getName());
 			});	
+			System.exit(0);
 		}
 		
 		

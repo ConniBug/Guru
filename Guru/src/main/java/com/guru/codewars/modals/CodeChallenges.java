@@ -1,4 +1,4 @@
-package com.syntex.modals;
+package com.guru.codewars.modals;
 public class CodeChallenges {
  private float totalAuthored;
  private float totalCompleted;
