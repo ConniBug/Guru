@@ -1,18 +1,33 @@
 package com.guru.codewars.modals;
 
+import org.json.JSONObject;
+
 public class CodewarsUserProfile {
-	
  private String id;
  private String username;
  private String name;
  private float honor;
  private String clan;
  private float leaderboardPosition;
- private Ranks RanksObject;
- private CodeChallenges CodeChallengesObject;
+ Ranks RanksObject;
+ CodeChallenges CodeChallengesObject;
+ private JSONObject json;
 
 
- // Getter Methods 
+ public CodewarsUserProfile(String id, String username, String name, float honor, String clan, float leaderboardPosition,
+		Ranks ranksObject, CodeChallenges codeChallengesObject, JSONObject obj) {
+	this.id = id;
+	this.username = username;
+	this.name = name;
+	this.honor = honor;
+	this.clan = clan;
+	this.leaderboardPosition = leaderboardPosition;
+	RanksObject = ranksObject;
+	CodeChallengesObject = codeChallengesObject;
+	this.setJson(obj);
+}
+
+// Getter Methods 
 
  public String getId() {
   return id;
@@ -79,4 +94,12 @@ public class CodewarsUserProfile {
  public void setCodeChallenges(CodeChallenges codeChallengesObject) {
   this.CodeChallengesObject = codeChallengesObject;
  }
+
+public JSONObject getJson() {
+	return json;
+}
+
+public void setJson(JSONObject json) {
+	this.json = json;
+}
 }

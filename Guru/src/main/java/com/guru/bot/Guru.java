@@ -1,5 +1,8 @@
 package com.guru.bot;
 
+import java.util.EnumSet;
+
+import com.guru.codewars.kata.KataCasher;
 import com.guru.commands.CommandManager;
 import com.guru.credentials.Credentials;
 import com.guru.data.MemoryManagement;
@@ -27,11 +30,24 @@ public class Guru {
 	private final CommandManager commandManager;
 	private final Credentials credentials;
 	private final UsersHandler usersHandler;
+	private final KataCasher kataCasher;
 	
 	private ShardManager JDA;
 	
 	private final StartupConfiguration startupConfiguration;
 	
+	public Credentials getCredentials() {
+		return credentials;
+	}
+
+	public KataCasher getKataCasher() {
+		return kataCasher;
+	}
+
+	public void setJDA(ShardManager jDA) {
+		JDA = jDA;
+	}
+
 	/**
 	 * this initialises the program instance.
 	 */
@@ -44,13 +60,16 @@ public class Guru {
 		
 		this.startupConfiguration = new StartupConfiguration();
 
+		this.kataCasher = new KataCasher();
+		this.kataCasher.casheKatas();
+		
 		this.management.inject(credentials, startupConfiguration);
 		
 		//instantiate the jda instance, this is done to login to discord
 		this.sharedManager = DefaultShardManagerBuilder
 							 		.createDefault(this.credentials.AUTH_KEY)
 							 		.setStatus(this.startupConfiguration.getStatus())
-							 		.enableIntents(GatewayIntent.MESSAGE_CONTENT);
+							 		.enableIntents(EnumSet.allOf(GatewayIntent.class));
 		
 		
 		this.usersHandler = new UsersHandler(this.management);

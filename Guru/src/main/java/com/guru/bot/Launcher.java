@@ -9,6 +9,6 @@ public class Launcher {
 	public static void main(String[] args) {
 		//start the bot.
 		Guru instance = new Guru();
-		instance.start();
+		instance.start();		
 	}
 }

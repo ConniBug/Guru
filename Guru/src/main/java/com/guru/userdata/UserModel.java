@@ -3,28 +3,40 @@ package com.guru.userdata;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.guru.bot.Guru;
 import com.guru.codewars.modals.CodewarsUserProfile;
+import com.guru.codewars.users.katas.CompletedKata;
+import com.guru.codewars.users.katas.Datum;
 import com.guru.commands.shop.Transaction;
 import com.guru.commands.shop.TransactionType;
 import com.guru.logger.Logger;
 import com.guru.utils.Network;
+
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 
 public class UserModel {
 
 	private String userID;
 	private int bablons;
 	private String codewars;
+	private String effectiveName;
+	private List<Datum> katas;
 	
 	private List<Transaction> transactions;
-	private List<String> link;
+	private String link;
 	
 	public String getUserID() {
 		return userID;
@@ -33,8 +45,18 @@ public class UserModel {
 		this.userID = userID;
 	}
 	public int getBablons() {
+		
+		if(!this.codewars.isEmpty()) {
+			return bablons + (int)this.getCodewarsProfile().getHonor();
+		}
+		
 		return bablons;
 	}
+	
+	public List<Datum> getCashedKatas() {
+		return this.katas;
+	}
+	
 	public List<Transaction> getTransactions() {
 		return transactions;
 	}
@@ -47,28 +69,104 @@ public class UserModel {
 	public void setCodewars(String codewars) {
 		this.codewars = codewars;
 	}
-	public List<String> getLink() {
-		return link;
-	}
-	public void setLink(List<String> link) {
-		this.link = link;
-	}
 	public void setBablons(int bablons) {
 		this.bablons = bablons;
 	}
 	
-	public UserModel(String userID, int bablons, List<Transaction> transactions, List<String> link, String codewars) {
+	/**
+	 * 
+	 * @return the users completed katas
+	 */
+	public Future<List<Datum>> getKatas(){
+		return Executors.newSingleThreadExecutor().submit(() -> {
+			
+			Gson gson = new Gson().newBuilder().setPrettyPrinting().create();
+			
+			List<Datum> entries = new ArrayList<>();
+			
+			List<CompletedKata> katas = new ArrayList<>();
+			
+			String json = Network.readURL("https://www.codewars.com/api/v1/users/"+ this.codewars.split("users/")[1] + "/code-challenges/completed?page=0");
+			
+			CompletedKata o = gson.fromJson(json, CompletedKata.class);
+			
+			katas.add(o);
+			
+			for(int i = 1; i < o.totalPages; i++) {
+				CompletedKata kata = gson.fromJson(Network.readURL("https://www.codewars.com/api/v1/users/"+ this.codewars.split("users/")[1] + "/code-challenges/completed?page=" + i), CompletedKata.class);
+				katas.add(kata);
+			}
+			
+			katas.forEach(k -> k.data.forEach(entries::add));
+			
+			return entries;
+		});
+	}
+	
+	/**
+	 * 
+	 * @return the users completed katas
+	 */
+	public Future<List<Datum>> getKatasSorted(Comparator<? super Datum> sort){
+		return Executors.newSingleThreadExecutor().submit(() -> {
+			
+			Gson gson = new Gson().newBuilder().setPrettyPrinting().create();
+			
+			List<Datum> entries = new ArrayList<>();
+			
+			List<CompletedKata> katas = new ArrayList<>();
+			
+			String json = Network.readURL("https://www.codewars.com/api/v1/users/"+ this.codewars.split("users/")[1] + "/code-challenges/completed?page=0");
+			
+			CompletedKata o = gson.fromJson(json, CompletedKata.class);
+			
+			katas.add(o);
+			
+			for(int i = 1; i < o.totalPages; i++) {
+				CompletedKata kata = gson.fromJson(Network.readURL("https://www.codewars.com/api/v1/users/"+ this.codewars.split("users/")[1] + "/code-challenges/completed?page=" + i), CompletedKata.class);
+				katas.add(kata);
+			}
+			
+			katas.forEach(k -> k.data.forEach(entries::add));
+			
+			entries.sort(sort);
+			
+			return entries;
+		});
+	}
+	
+	
+	/**
+	 * updates any details for the user model with the user itself
+	 * @param user update the users model with the jda user
+	 */
+	public UserModel feedUser(User user) {
+		this.effectiveName = user.getName();
+		return this;
+	}
+	
+	/**
+	 * updates any details for the user model with the member itself
+	 * @param user update the users model with the jda member
+	 */
+	public UserModel feedUser(Member user) {
+		this.effectiveName = user.getEffectiveName();
+		return this;
+	}
+	
+	public UserModel(String userID, int bablons, List<Transaction> transactions, String link, String codewars, String effectiveName, List<Datum> katas) {
 		this.userID = userID;
 		this.bablons = bablons;
 		this.transactions = transactions;
 		this.link = link;
 		this.codewars = codewars;
+		this.effectiveName = effectiveName;
+		this.setKatas(katas);
 		
 	}
 	
 	public void createCodeWarsLink(String link) {
-		this.link.clear();
-		this.link.add(link);
+		this.setLink(link);
 	}
 	
 	/**
@@ -157,16 +255,35 @@ public class UserModel {
 
 		  return result.toString();
 		}
+	
 	public CodewarsUserProfile getCodewarsProfile() {
 		
 		String url = "https://www.codewars.com/api/v1/users/" + this.codewars.split("users/")[1];
 		String json = Network.readURL(url);
+		JSONObject data = new JSONObject(json);
 		
 		Gson gson = new Gson();
 		
 		CodewarsUserProfile profile = gson.fromJson(json, CodewarsUserProfile.class);
+		profile.setJson(data);
 		
 		return profile;
+	}
+	
+	public String getEffectiveName() {
+		return effectiveName;
+	}
+	public void setEffectiveName(String effectiveName) {
+		this.effectiveName = effectiveName;
+	}
+	public String getLink() {
+		return link;
+	}
+	public void setLink(String link) {
+		this.link = link;
+	}
+	public void setKatas(List<Datum> katas) {
+		this.katas = katas;
 	}
 	
 	

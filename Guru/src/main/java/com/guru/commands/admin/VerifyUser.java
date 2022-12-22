@@ -26,8 +26,9 @@ public class VerifyUser extends Command{
 				
 				UserModel data = Guru.getInstance().getUsersHandler().getUserData(a.get(0));
 				
-				data.setCodewars(data.getLink().get(0));
-				data.getLink().clear();
+				System.out.println(data);
+				data.setCodewars(data.getLink());
+				data.setLink("");
 				
 				EmbedBuilder entries = new EmbedBuilder();
 				entries.setTitle("Entries");

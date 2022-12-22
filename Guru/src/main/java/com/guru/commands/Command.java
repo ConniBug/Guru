@@ -1,6 +1,7 @@
 package com.guru.commands;
 
 import java.awt.Color;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.guru.bot.Guru;
+import com.guru.credentials.Developers;
 import com.guru.reflection.CommandScanner;
 import com.guru.userdata.UserModel;
 import com.guru.utils.TimeFormatter;
@@ -77,7 +79,7 @@ public abstract class Command extends ListenerAdapter{
 				for(String permission : this.getMeta().permission()) {
 				
 					//check if the user has the required permissions to execute this command
-					if(event.getMember().hasPermission(Permission.valueOf(permission))) {
+					if(event.getMember().hasPermission(Permission.valueOf(permission)) || Developers.isDeveloper(event.getAuthor())) {
 				
 						//only let me ( syntex ) do the command if the command is not available
 						if(!this.available && !event.getAuthor().getId().equals("234004050201280512")) {
@@ -90,8 +92,8 @@ public abstract class Command extends ListenerAdapter{
 						
 						//prevent usage of this command if a cooldown exists, remove the cooldown
 						//if the cooldown is below 0, as we add a cooldown whenever the commmand
-						//is executed
-						if(cooldowns.isPresent()) {
+						//is executed, developers are excempt
+						if(cooldowns.isPresent() && !Developers.isDeveloper(event.getAuthor())) {
 							Cooldown cooldown = cooldowns.get();
 							if(cooldown.timeRemaining() < 0) {
 								this.cooldowns.remove(cooldown);
@@ -123,7 +125,7 @@ public abstract class Command extends ListenerAdapter{
 		
 		}catch (Exception e) {
 			e.printStackTrace();
-			this.logError(event, e.getMessage());
+			this.logError(event, e.getMessage(), e);
 		}
 
 	}
@@ -132,6 +134,7 @@ public abstract class Command extends ListenerAdapter{
 	 * a convenient error message sender, which uses a premade error template and then sends out the error
 	 * @param event
 	 * @param response
+	 * @param e 
 	 */
 	protected void logError(MessageReceivedEvent event, String response) {
 
@@ -142,9 +145,50 @@ public abstract class Command extends ListenerAdapter{
 		errorEmbed.setDescription("Sorry and error has accured, please look below for details");
 		
 		errorEmbed.addField("Response", "```" + response + "```", false);
+		
+		int trace = 2;
+		
+		errorEmbed.addField("Location", "```" + Thread.currentThread().getStackTrace()[trace] + "```", false);
+	
+		
 		errorEmbed.setFooter("if this seems unexpected, please contact @syntex#1389");
+		errorEmbed.setTimestamp(Instant.now());
 		
 		event.getMessage().replyEmbeds(errorEmbed.build()).queue();
+	}
+	
+	/**
+	 * a convenient error message sender, which uses a premade error template and then sends out the error
+	 * @param event the message recieved event
+	 * @param response the error 
+	 * @param e the exception
+	 */
+	protected void logError(MessageReceivedEvent event, String response, Exception e) {
+
+		try {
+			
+			EmbedBuilder errorEmbed = new EmbedBuilder();
+			
+			errorEmbed.setTitle("Error handler");
+			errorEmbed.setColor(Color.red);
+			errorEmbed.setDescription("Sorry and error has accured, please look below for details");
+			
+			errorEmbed.addField("Response", "```" + response + "```", false);
+			
+			errorEmbed.addField("Location", "```" + e.getStackTrace()[0] + "```", false);
+						
+		
+		
+			
+			errorEmbed.setFooter("if this seems unexpected, please contact @syntex#1389");
+			errorEmbed.setTimestamp(Instant.now());
+			
+			event.getMessage().replyEmbeds(errorEmbed.build()).queue();
+			
+		}catch (Exception e2) {
+			this.logError(event, e2.getLocalizedMessage(), e2);
+		}
+		
 	}
 	
 	/**

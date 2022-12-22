@@ -23,7 +23,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class BalanceTop extends Command{
 
 	public BalanceTop() {
-		this.setAvailable(false);
+		this.setAvailable(true);
 	}
 	
 	@Override

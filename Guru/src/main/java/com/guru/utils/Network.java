@@ -14,7 +14,7 @@ public class Network {
 	public static String readURL(String page) {
 		try {
 			HttpGet request = new HttpGet(page);
-			CloseableHttpClient client = HttpClients.custom().setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36").setConnectionTimeToLive(5, TimeUnit.SECONDS).build();
+			CloseableHttpClient client = HttpClients.custom().disableCookieManagement().setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36").setConnectionTimeToLive(5, TimeUnit.SECONDS).build();
 			CloseableHttpResponse response = client.execute(request);
 			HttpEntity entity = response.getEntity();
 			String dat = EntityUtils.toString(entity);

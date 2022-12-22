@@ -14,4 +14,8 @@ public class Languages {
  public void setJava(Java javaObject) {
   this.JavaObject = javaObject;
  }
+
+public Languages(Java javaObject) {
+	JavaObject = javaObject;
+}
 }

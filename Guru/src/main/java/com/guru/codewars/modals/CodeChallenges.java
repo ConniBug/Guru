@@ -16,7 +16,12 @@ public class CodeChallenges {
 
  // Setter Methods 
 
- public void setTotalAuthored(float totalAuthored) {
+ public CodeChallenges(float totalAuthored, float totalCompleted) {
+	this.totalAuthored = totalAuthored;
+	this.totalCompleted = totalCompleted;
+}
+
+public void setTotalAuthored(float totalAuthored) {
   this.totalAuthored = totalAuthored;
  }
 

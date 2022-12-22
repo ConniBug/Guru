@@ -23,8 +23,11 @@ public class Ranks extends Command{
 		ranks.setTitle("Ranks");
 		ranks.setColor(Color.green);
 
-		for(com.syntex.modals.Ranks i : com.syntex.modals.Ranks.values()) {
-			ranks.addField(Guru.getInstance().getJDA().getRoleById(i.getID()).getName(), i.getRequiredXP() + " score", true);
+		com.syntex.modals.Ranks[] allRanks = com.syntex.modals.Ranks.values();
+		
+		for(int i = allRanks.length - 1; i >= 0; i--) {
+			ranks.appendDescription(Guru.getInstance().getJDA().getRoleById(allRanks[i].getID()).getAsMention() + " `" + allRanks[i].getRequiredXP() + " score`");
+			ranks.appendDescription(System.lineSeparator());
 		}
 
 		event.getMessage().replyEmbeds(ranks.build()).queue();

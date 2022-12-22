@@ -21,9 +21,7 @@ public class Link extends Command{
 
 	@Override
 	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
-		
-		System.out.println(args.length + " -> " + args[1]);
-		
+
 		if(args.length == 1 || !args[1].startsWith("https://www.codewars.com/users/")) {
 			throw new Exception("please do ;link https://www.codewars.com/users/{YOURNAME}");
 		}

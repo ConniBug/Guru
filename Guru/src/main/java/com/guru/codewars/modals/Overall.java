@@ -26,7 +26,14 @@ public class Overall {
 
  // Setter Methods 
 
- public void setRank(float rank) {
+ public Overall(float rank, String name, String color, float score) {
+	this.rank = rank;
+	this.name = name;
+	this.color = color;
+	this.score = score;
+}
+
+public void setRank(float rank) {
   this.rank = rank;
  }
 

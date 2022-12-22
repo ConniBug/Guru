@@ -31,7 +31,7 @@ public class CodeWarsLinkEntries extends Command{
 		
 		for(int i = 0; i < users.size(); i++) {
 			UserModel user = users.get(i);
-			entries.addField(event.getGuild().getMemberById(user.getUserID()).getEffectiveName(), user.getLink().get(0), false);
+			entries.addField(event.getGuild().getMemberById(user.getUserID()).getEffectiveName(), user.getLink(), false);
 		}
 		
 		event.getMessage().replyEmbeds(entries.build()).queue();

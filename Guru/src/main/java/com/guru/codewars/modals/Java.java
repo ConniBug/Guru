@@ -20,7 +20,15 @@ public class Java {
   return color;
  }
 
- public float getScore() {
+ public Java(float rank, String name, String color, float score) {
+	super();
+	this.rank = rank;
+	this.name = name;
+	this.color = color;
+	this.score = score;
+}
+
+public float getScore() {
   return score;
  }
 

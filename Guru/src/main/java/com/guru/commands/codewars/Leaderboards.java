@@ -19,9 +19,8 @@ public class Leaderboards extends Command{
 
 	@Override
 	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
-
-	
-		List<UserModel> z = Guru.getInstance().getUsersHandler().getUsers().stream().filter(o -> !o.getCodewars().isEmpty()).sorted((a, b) -> (int)b.getCodewarsProfile().getHonor() - (int)a.getCodewarsProfile().getHonor()).collect(Collectors.toList());
+		
+		List<UserModel> z = Guru.getInstance().getUsersHandler().getUsers().stream().filter(o -> !o.getCodewars().isEmpty()).sorted((a, b) -> (int)b.getCodewarsProfile().getHonor() - (int)a.getCodewarsProfile().getHonor()).limit(10).collect(Collectors.toList());
 	
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		
@@ -30,16 +29,20 @@ public class Leaderboards extends Command{
 		embedBuilder.setThumbnail(event.getJDA().getSelfUser().getAvatarUrl());
 		embedBuilder.setDescription("here is the leaderboard");
 		
-		z.forEach(i -> {
-			embedBuilder.addField(i.getUserID(), i.getCodewarsProfile().getHonor()+"", false);
-		});
+		for(int i = 0; i < z.size(); i++) {
+			UserModel data = z.get(i);
+			embedBuilder.appendDescription(System.lineSeparator());
+			embedBuilder.appendDescription("`#" + (i+1) + "` " + data.getEffectiveName() + " - `" + data.getCodewarsProfile().getHonor() + "`");	
+		}
+		
+
 		
 		embedBuilder.setFooter("if this seems unexpected, please contact @syntex#1389");
 		
 		MessageEmbed embed = embedBuilder.build();
 		
-		event.getMessage().replyEmbeds(embed).queue();;
-		
+		event.getMessage().replyEmbeds(embed).queue();
+
 		
 	}
 

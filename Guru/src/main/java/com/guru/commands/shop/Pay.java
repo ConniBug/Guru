@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class Pay extends Command{
 
 	public Pay() {
-		this.setAvailable(false);
+		this.setAvailable(true);
 	}
 	
 	@Override
@@ -37,8 +37,7 @@ public class Pay extends Command{
 			if(a.size() > 0) {
 				user = a.get(0);
 				if(user.getId().equals(event.getAuthor().getId())) {
-					this.logError(event, "Sorry, you cannot pay yourself!");
-					return;
+					throw new Exception("Sorry, you cannot pay yourself!");
 				}
 			}
 		}else {
@@ -48,6 +47,10 @@ public class Pay extends Command{
 		
 		if(!Numbers.isNumber(args[2])) {
 			throw new Exception("usage: " + this.getMeta().usage()[0]);
+		}
+		
+		if(Numbers.getNumber(args[2]) < 0) {
+			throw new Exception("You can't pay someone a negative number");
 		}
 		
 		UserModel userData = Guru.getInstance().getUsersHandler().getUserData(event.getMember().getId());

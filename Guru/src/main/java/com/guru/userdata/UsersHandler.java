@@ -16,6 +16,7 @@ import com.google.gson.GsonBuilder;
 import com.guru.data.MemoryManagement;
 import com.guru.logger.Logger;
 
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 
 public class UsersHandler {
@@ -70,7 +71,7 @@ public class UsersHandler {
 			return data.get();
 		}
 		
-		UserModel user = new UserModel(id, 0, new ArrayList<>(), new ArrayList<>(), "");
+		UserModel user = new UserModel(id, 0, new ArrayList<>(), "", "", "", new ArrayList<>());
 		
 		this.users.add(user);
 
@@ -83,7 +84,38 @@ public class UsersHandler {
 	 * @return
 	 */
 	public UserModel getUserData(User user) {
-		return this.getUserData(user.getId());
+		
+		Optional<UserModel> data = this.users.stream().filter(o -> o.getUserID().equals(user.getId())).findFirst();
+		
+		if(data.isPresent()) {
+			return data.get().feedUser(user);
+		}
+		
+		UserModel model = new UserModel(user.getId(), 0, new ArrayList<>(), "", "", user.getName(), new ArrayList<>());
+		
+		this.users.add(model);
+
+		return model;
+	}
+	
+	/**
+	 * returns the user data from the users
+	 * @param the user
+	 * @return
+	 */
+	public UserModel getUserData(Member user) {
+		
+		Optional<UserModel> data = this.users.stream().filter(o -> o.getUserID().equals(user.getId())).findFirst();
+		
+		if(data.isPresent()) {
+			return data.get().feedUser(user);
+		}
+		
+		UserModel model = new UserModel(user.getId(), 0, new ArrayList<>(), "", "", user.getEffectiveName(), new ArrayList<>());
+		
+		this.users.add(model);
+
+		return model;
 	}
 	
 	/**

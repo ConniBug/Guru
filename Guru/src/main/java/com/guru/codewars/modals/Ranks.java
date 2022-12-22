@@ -20,7 +20,12 @@ public class Ranks {
   this.OverallObject = overallObject;
  }
 
- public void setLanguages(Languages languagesObject) {
+ public Ranks(Overall overallObject, Languages languagesObject) {
+	OverallObject = overallObject;
+	LanguagesObject = languagesObject;
+}
+
+public void setLanguages(Languages languagesObject) {
   this.LanguagesObject = languagesObject;
  }
 }

@@ -25,6 +25,7 @@ public class MemoryManagement {
 
 	private ClazzScanner clazzScanner;
 	private File res;
+	private File files;
 
 	/**
 	 * K = Class name
@@ -42,10 +43,12 @@ public class MemoryManagement {
 		//load default json files
 		File path = new File(MemoryManagement.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
 		this.res = new File(path, "configuration");
+		this.setFiles(new File(path, "files"));
 		
 		if(path.getAbsolutePath().contains("target")) {
 			//res = new File(this.getClass().getResource("/configuration").getFile());
 			this.res = new File("C:\\Users\\synte\\OneDrive - University of Kent\\Desktop\\test123\\configuration");
+			this.setFiles(new File("C:\\Users\\synte\\OneDrive - University of Kent\\Desktop\\test123\\files"));
 		}
 		
 		this.addJsonFiles(res);
@@ -207,6 +210,14 @@ public class MemoryManagement {
 
 	public void setRes(File res) {
 		this.res = res;
+	}
+
+	public File getFiles() {
+		return files;
+	}
+
+	public void setFiles(File files) {
+		this.files = files;
 	}
 
 	
