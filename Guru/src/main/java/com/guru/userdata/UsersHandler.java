@@ -2,7 +2,8 @@ package com.guru.userdata;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -13,16 +14,24 @@ import org.apache.commons.io.FileUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.guru.bot.Guru;
+import com.guru.codewars.modals.CodewarsMeta;
+import com.guru.codewars.users.katas.Datum;
 import com.guru.data.MemoryManagement;
 import com.guru.logger.Logger;
+import com.syntex.modals.Ranks;
 
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 
 public class UsersHandler {
 
 	private Set<UserModel> users = new HashSet<>();
 	private MemoryManagement memoryManagement;
+	
+	private HashMap<String, Date> lastUpdated;
+	private long UPDATE_TIMER = 1000*60*10;
 	
 	public UsersHandler(@Nonnull MemoryManagement management) {
 		this.memoryManagement = management;
@@ -41,6 +50,8 @@ public class UsersHandler {
 			
 		});
 		
+		this.lastUpdated = new HashMap<>();
+		
 	}
 	
 	public Set<UserModel> getUsers() {
@@ -58,6 +69,61 @@ public class UsersHandler {
 	public void setMemoryManagement(MemoryManagement memoryManagement) {
 		this.memoryManagement = memoryManagement;
 	}
+	
+	public void update(String id) {
+		
+		Date now = new Date();
+		
+		if(!this.lastUpdated.containsKey(id)) {
+			this.cashe(id);
+			return;
+		}
+		
+		Date lastUpdated = this.lastUpdated.get(id);
+		
+		long difference = now.getTime() - lastUpdated.getTime();
+		
+		if(difference < UPDATE_TIMER) {
+			return;
+		}
+		
+		this.cashe(id);
+		
+	}
+	
+	public void cashe(String id) {
+		Date now = new Date();
+		
+		Logger.INFO("Updated cashe for " + id);
+		
+		UserModel data = this.users.stream().filter(o -> o.getUserID().equals(id)).findFirst().get();
+		
+		CodewarsProfile updatedProfile = new CodewarsProfile(data.getCodewars().getProfile(),
+															 CodewarsMeta.fromName(data.getCodewars().getName()),
+															 Datum.fromApi(data.getCodewars().getApiURL()));
+		
+		data.setCodewars(updatedProfile);
+		data.save();
+		
+		this.lastUpdated.put(id, now);
+	
+		int value = data.getCodewars().getMeta().getRanks().getOverall().getRank();
+		Ranks rank = Ranks.fromValue(value);
+		
+		Guru.getInstance().getJDA().getGuilds().forEach(o -> {
+			Optional<Role> roles = o.getRoles().stream().filter(k -> k.getId().equals(rank.getID())).findFirst();
+			if(roles.isPresent()) {
+				new Thread(() -> {
+					o.loadMembers().get().stream().filter(k -> k.getId().equals(id)).findFirst().ifPresent(p -> {
+						o.addRoleToMember(p, roles.get()).queue();
+						System.out.println("saved " + p.getEffectiveName());
+					});
+				}).start();
+			}
+		});
+	
+	
+	}
 
 	/**
 	 * returns the user data from the users discord id
@@ -68,10 +134,11 @@ public class UsersHandler {
 		Optional<UserModel> data = this.users.stream().filter(o -> o.getUserID().equals(id)).findFirst();
 		
 		if(data.isPresent()) {
+			this.update(id);
 			return data.get();
 		}
-		
-		UserModel user = new UserModel(id, 0, new ArrayList<>(), "", "", "", new ArrayList<>());
+	
+		UserModel user = UserModel.empty(id);
 		
 		this.users.add(user);
 
@@ -88,10 +155,11 @@ public class UsersHandler {
 		Optional<UserModel> data = this.users.stream().filter(o -> o.getUserID().equals(user.getId())).findFirst();
 		
 		if(data.isPresent()) {
+			this.update(user.getId());
 			return data.get().feedUser(user);
 		}
 		
-		UserModel model = new UserModel(user.getId(), 0, new ArrayList<>(), "", "", user.getName(), new ArrayList<>());
+		UserModel model = UserModel.empty(user);
 		
 		this.users.add(model);
 
@@ -108,10 +176,11 @@ public class UsersHandler {
 		Optional<UserModel> data = this.users.stream().filter(o -> o.getUserID().equals(user.getId())).findFirst();
 		
 		if(data.isPresent()) {
+			this.update(user.getId());
 			return data.get().feedUser(user);
 		}
 		
-		UserModel model = new UserModel(user.getId(), 0, new ArrayList<>(), "", "", user.getEffectiveName(), new ArrayList<>());
+		UserModel model = UserModel.empty(user);
 		
 		this.users.add(model);
 

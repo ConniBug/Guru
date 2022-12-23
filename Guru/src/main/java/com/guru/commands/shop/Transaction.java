@@ -2,13 +2,23 @@ package com.guru.commands.shop;
 
 import java.util.Date;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Transaction {
 	
+	@SerializedName("amount")
 	private int amount;
+	
+	@SerializedName("sender")
 	private String sender;
+	
+	@SerializedName("reciever")
 	private String reciever;
+	
+	@SerializedName("type")
 	private TransactionType type;
 	
+	@SerializedName("time")
 	private Date time;
 
 	public Transaction(int amount, String sender, String reciever, Date time, TransactionType type) {

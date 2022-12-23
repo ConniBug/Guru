@@ -1,21 +1,51 @@
 package com.guru.codewars.modals;
+
+import java.lang.reflect.Field;
+
+import com.google.gson.annotations.SerializedName;
+
+   
 public class Languages {
- Java JavaObject;
+
+   @SerializedName("java")
+   Java java;
 
 
- // Getter Methods 
+    public void setJava(Java java) {
+        this.java = java;
+    }
+    public Java getJava() {
+        return java;
+    }
+    
+    @Override
+    public String toString() {
+    	  StringBuilder result = new StringBuilder();
+    	  String newLine = System.getProperty("line.separator");
 
- public Java getJava() {
-  return JavaObject;
- }
+    	  result.append( this.getClass().getName() );
+    	  result.append( " Object {" );
+    	  result.append(newLine);
 
- // Setter Methods 
+    	  //determine fields declared in this class only (no fields of superclass)
+    	  Field[] fields = this.getClass().getDeclaredFields();
 
- public void setJava(Java javaObject) {
-  this.JavaObject = javaObject;
- }
+    	  //print field names paired with their values
+    	  for ( Field field : fields  ) {
+    	    result.append("  ");
+    	    try {
+    	      result.append( field.getName() );
+    	      result.append(": ");
+    	      //requires access to private field:
+    	      result.append( field.get(this) );
+    	    } catch ( IllegalAccessException ex ) {
+    	      System.out.println(ex);
+    	    }
+    	    result.append(newLine);
+    	  }
+    	  result.append("}");
 
-public Languages(Java javaObject) {
-	JavaObject = javaObject;
-}
+    	  return result.toString();
+    	}
+    
 }

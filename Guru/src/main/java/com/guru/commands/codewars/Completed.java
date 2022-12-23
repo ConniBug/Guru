@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.guru.bot.Guru;
 import com.guru.codewars.kata.Kata;
@@ -24,7 +23,7 @@ public class Completed extends Command{
 
 	@Override
 	public void onCommand(MessageReceivedEvent event, String[] args, UserModel m) throws Exception {
-
+		
 		int counter = 0;
 		
 		List<Member> mentions = event.getMessage().getMentions().getMembers();
@@ -35,12 +34,13 @@ public class Completed extends Command{
 			model = Guru.getInstance().getUsersHandler().getUserData(mentions.get(0));
 		}
 		
-		if(model.getCodewars().isEmpty()) {
+		if(!model.getCodewars().isRegistered()) {
 			throw new Exception("Sorry, you need to link your account first.");
 		}
 		
-		List<Datum> data = model.getCashedKatas();
+		//List<Datum> data = model.getCashedKatas();
 		
+		/*
 		if(data == null || data.isEmpty()) {
 			
 			System.out.println("cashing");
@@ -80,7 +80,7 @@ public class Completed extends Command{
 			model.save();
 			
 		}
-		
+		*/
 		
 		//List<Datum> data = model.getKatas().get().stream().limit(35).collect(Collectors.toList());
 		
@@ -88,7 +88,7 @@ public class Completed extends Command{
 		
 		List<String> completed = new ArrayList<>();
 		
-		for(Datum o : data) {
+		for(Datum o : model.getCodewars().getKatasSorted()) {
 			Optional<Kata> kata = Guru.getInstance().getKataCasher().getKataFromId(o.id).get();
 			
 			int textLimit = 35;
@@ -122,7 +122,7 @@ public class Completed extends Command{
 			embedBuilder.setColor(Color.cyan);
 			embedBuilder.setThumbnail(event.getJDA().getSelfUser().getAvatarUrl());
 			
-			embedBuilder.setDescription("here is every kata you have completed thus far. page " + o.getPage() + "/" + o.getParent().getLastPage());
+			embedBuilder.setDescription("here are the first 200 katas you've done. page " + o.getPage() + "/" + o.getParent().getLastPage());
 			
 			embedBuilder.appendDescription(System.lineSeparator());
 			
@@ -138,7 +138,6 @@ public class Completed extends Command{
 		
 	
 		//event.getMessage().replyEmbeds(embedBuilder.build()).queue();
-		
 	}
 
 }

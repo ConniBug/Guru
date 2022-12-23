@@ -31,8 +31,7 @@ public class Ranks extends Command{
 		}
 
 		event.getMessage().replyEmbeds(ranks.build()).queue();
-		
-		
+
 	}
 
 }

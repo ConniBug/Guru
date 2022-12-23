@@ -1,31 +1,61 @@
 package com.guru.codewars.modals;
+
+import java.lang.reflect.Field;
+
+import com.google.gson.annotations.SerializedName;
+
+   
 public class Ranks {
- Overall OverallObject;
- Languages LanguagesObject;
+
+   @SerializedName("languages")
+   Languages languages;
+
+   @SerializedName("overall")
+   Overall overall;
 
 
- // Getter Methods 
+    public void setLanguages(Languages languages) {
+        this.languages = languages;
+    }
+    public Languages getLanguages() {
+        return languages;
+    }
+    
+    public void setOverall(Overall overall) {
+        this.overall = overall;
+    }
+    public Overall getOverall() {
+        return overall;
+    }
+    
+    @Override
+    public String toString() {
+    	  StringBuilder result = new StringBuilder();
+    	  String newLine = System.getProperty("line.separator");
 
- public Overall getOverall() {
-  return OverallObject;
- }
+    	  result.append( this.getClass().getName() );
+    	  result.append( " Object {" );
+    	  result.append(newLine);
 
- public Languages getLanguages() {
-  return LanguagesObject;
- }
+    	  //determine fields declared in this class only (no fields of superclass)
+    	  Field[] fields = this.getClass().getDeclaredFields();
 
- // Setter Methods 
+    	  //print field names paired with their values
+    	  for ( Field field : fields  ) {
+    	    result.append("  ");
+    	    try {
+    	      result.append( field.getName() );
+    	      result.append(": ");
+    	      //requires access to private field:
+    	      result.append( field.get(this) );
+    	    } catch ( IllegalAccessException ex ) {
+    	      System.out.println(ex);
+    	    }
+    	    result.append(newLine);
+    	  }
+    	  result.append("}");
 
- public void setOverall(Overall overallObject) {
-  this.OverallObject = overallObject;
- }
-
- public Ranks(Overall overallObject, Languages languagesObject) {
-	OverallObject = overallObject;
-	LanguagesObject = languagesObject;
-}
-
-public void setLanguages(Languages languagesObject) {
-  this.LanguagesObject = languagesObject;
- }
+    	  return result.toString();
+    	}
+    
 }

@@ -1,31 +1,61 @@
 package com.guru.codewars.modals;
+
+import java.lang.reflect.Field;
+
+import com.google.gson.annotations.SerializedName;
+
+   
 public class CodeChallenges {
- private float totalAuthored;
- private float totalCompleted;
+
+   @SerializedName("totalAuthored")
+   int totalAuthored;
+
+   @SerializedName("totalCompleted")
+   int totalCompleted;
 
 
- // Getter Methods 
+    public void setTotalAuthored(int totalAuthored) {
+        this.totalAuthored = totalAuthored;
+    }
+    public int getTotalAuthored() {
+        return totalAuthored;
+    }
+    
+    public void setTotalCompleted(int totalCompleted) {
+        this.totalCompleted = totalCompleted;
+    }
+    public int getTotalCompleted() {
+        return totalCompleted;
+    }
+    
+    @Override
+    public String toString() {
+    	  StringBuilder result = new StringBuilder();
+    	  String newLine = System.getProperty("line.separator");
 
- public float getTotalAuthored() {
-  return totalAuthored;
- }
+    	  result.append( this.getClass().getName() );
+    	  result.append( " Object {" );
+    	  result.append(newLine);
 
- public float getTotalCompleted() {
-  return totalCompleted;
- }
+    	  //determine fields declared in this class only (no fields of superclass)
+    	  Field[] fields = this.getClass().getDeclaredFields();
 
- // Setter Methods 
+    	  //print field names paired with their values
+    	  for ( Field field : fields  ) {
+    	    result.append("  ");
+    	    try {
+    	      result.append( field.getName() );
+    	      result.append(": ");
+    	      //requires access to private field:
+    	      result.append( field.get(this) );
+    	    } catch ( IllegalAccessException ex ) {
+    	      System.out.println(ex);
+    	    }
+    	    result.append(newLine);
+    	  }
+    	  result.append("}");
 
- public CodeChallenges(float totalAuthored, float totalCompleted) {
-	this.totalAuthored = totalAuthored;
-	this.totalCompleted = totalCompleted;
-}
-
-public void setTotalAuthored(float totalAuthored) {
-  this.totalAuthored = totalAuthored;
- }
-
- public void setTotalCompleted(float totalCompleted) {
-  this.totalCompleted = totalCompleted;
- }
+    	  return result.toString();
+    	}
+    
 }

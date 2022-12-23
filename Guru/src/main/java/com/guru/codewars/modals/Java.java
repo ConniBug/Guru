@@ -1,52 +1,81 @@
 package com.guru.codewars.modals;
+
+import java.lang.reflect.Field;
+
+import com.google.gson.annotations.SerializedName;
+
+   
 public class Java {
- private float rank;
- private String name;
- private String color;
- private float score;
+
+   @SerializedName("score")
+   int score;
+
+   @SerializedName("color")
+   String color;
+
+   @SerializedName("name")
+   String name;
+
+   @SerializedName("rank")
+   int rank;
 
 
- // Getter Methods 
+    public void setScore(int score) {
+        this.score = score;
+    }
+    public int getScore() {
+        return score;
+    }
+    
+    public void setColor(String color) {
+        this.color = color;
+    }
+    public String getColor() {
+        return color;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getName() {
+        return name;
+    }
+    
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+    public int getRank() {
+        return rank;
+    }
+    
+    @Override
+    public String toString() {
+    	  StringBuilder result = new StringBuilder();
+    	  String newLine = System.getProperty("line.separator");
 
- public float getRank() {
-  return rank;
- }
+    	  result.append( this.getClass().getName() );
+    	  result.append( " Object {" );
+    	  result.append(newLine);
 
- public String getName() {
-  return name;
- }
+    	  //determine fields declared in this class only (no fields of superclass)
+    	  Field[] fields = this.getClass().getDeclaredFields();
 
- public String getColor() {
-  return color;
- }
+    	  //print field names paired with their values
+    	  for ( Field field : fields  ) {
+    	    result.append("  ");
+    	    try {
+    	      result.append( field.getName() );
+    	      result.append(": ");
+    	      //requires access to private field:
+    	      result.append( field.get(this) );
+    	    } catch ( IllegalAccessException ex ) {
+    	      System.out.println(ex);
+    	    }
+    	    result.append(newLine);
+    	  }
+    	  result.append("}");
 
- public Java(float rank, String name, String color, float score) {
-	super();
-	this.rank = rank;
-	this.name = name;
-	this.color = color;
-	this.score = score;
-}
-
-public float getScore() {
-  return score;
- }
-
- // Setter Methods 
-
- public void setRank(float rank) {
-  this.rank = rank;
- }
-
- public void setName(String name) {
-  this.name = name;
- }
-
- public void setColor(String color) {
-  this.color = color;
- }
-
- public void setScore(float score) {
-  this.score = score;
- }
+    	  return result.toString();
+    	}
+    
 }
