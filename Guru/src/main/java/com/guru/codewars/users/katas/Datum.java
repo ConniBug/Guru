@@ -43,6 +43,9 @@ public class Datum{
 		
 		String json = Network.readURL(api + "/code-challenges/completed?page=0");
 		
+		System.out.println(json);
+		System.out.println(api + "/code-challenges/completed?page=0");
+		
 		CompletedKata o = gson.fromJson(json, CompletedKata.class);
 		
 		katas.add(o);

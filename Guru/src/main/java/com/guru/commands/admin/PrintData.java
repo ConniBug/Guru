@@ -32,7 +32,7 @@ public class PrintData extends Command{
 				
 				String json = gson.toJson(data);
 				
-				event.getMessage().reply("```json" + System.lineSeparator()  + json +  System.lineSeparator() + "```").queue();
+				this.sendStringMessage("json", json, event, 1000);
 				
 			}
 		}else {

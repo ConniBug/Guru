@@ -5,10 +5,13 @@ import java.util.EnumSet;
 import com.guru.codewars.kata.KataCasher;
 import com.guru.commands.CommandManager;
 import com.guru.credentials.Credentials;
+import com.guru.dailychallenges.DailyChallenges;
 import com.guru.data.MemoryManagement;
 import com.guru.data.StartupConfiguration;
 import com.guru.userdata.UsersHandler;
 
+import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -18,7 +21,7 @@ import net.dv8tion.jda.api.sharding.ShardManager;
  * @author synte
  *
  */
-public class Guru {
+public class Guru extends ListenerAdapter{
 
 	//always keep an instance of the main program, for convenience.
 	private static Guru instance;
@@ -31,6 +34,7 @@ public class Guru {
 	private final Credentials credentials;
 	private final UsersHandler usersHandler;
 	private final KataCasher kataCasher;
+	private DailyChallenges dailyChallenges;
 	
 	private ShardManager JDA;
 	
@@ -65,6 +69,8 @@ public class Guru {
 		
 		this.management.inject(credentials, startupConfiguration);
 		
+		this.dailyChallenges = new DailyChallenges();
+		
 		//instantiate the jda instance, this is done to login to discord
 		this.sharedManager = DefaultShardManagerBuilder
 							 		.createDefault(this.credentials.AUTH_KEY)
@@ -78,7 +84,7 @@ public class Guru {
 		this.commandManager = new CommandManager();
 		this.commandManager.loadCommands();
 		
-		this.sharedManager.addEventListeners(this.commandManager);
+		this.sharedManager.addEventListeners(this, this.commandManager);
 	}
 	
 	public void start() {
@@ -122,6 +128,16 @@ public class Guru {
 
 	public UsersHandler getUsersHandler() {
 		return usersHandler;
+	}
+	
+	
+	@Override
+	public void onGuildReady(GuildReadyEvent event) {
+		super.onGuildReady(event);
+		if(event.getGuild().getId().equals(DailyChallenges.GUILD_ID)) {
+			this.dailyChallenges.start();
+		}
+	
 	}
 
 	

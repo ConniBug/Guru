@@ -14,10 +14,13 @@ import org.json.JSONObject;
 import com.guru.bot.Guru;
 import com.guru.logger.Logger;
 
-public class KataCasher {
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+
+public class KataCasher extends ListenerAdapter{
 
 	private final List<Kata> katas = new ArrayList<>();
 	private Thread workerThread = new Thread();
+	private volatile boolean READY = false;
 	
 	public void casheKatas() {		
 		
@@ -111,12 +114,29 @@ public class KataCasher {
 			
 			
 			Logger.INFO("registered " + katas.size() + " of " + max);
-				
+			this.READY = true;
+			
 		});
 		
 		this.workerThread.start();
 	}
 	
+	public Thread getWorkerThread() {
+		return workerThread;
+	}
+
+	public boolean isREADY() {
+		return READY;
+	}
+
+	public void setWorkerThread(Thread workerThread) {
+		this.workerThread = workerThread;
+	}
+
+	public void setREADY(boolean rEADY) {
+		READY = rEADY;
+	}
+
 	public Future<Optional<Kata>> getKataFromId(String id) {
 		return Executors.newSingleThreadExecutor().submit(() -> this.getKatas().get().stream().filter(o -> o.getId().equals(id)).findFirst());
 	}

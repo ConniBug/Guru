@@ -111,6 +111,23 @@ public class PagedEmbed extends ListenerAdapter{
 		this.event = event;
 		this.userOnly = userOnly;
 	}
+	
+	/**
+	 * 
+	 * @param event the MessageReceivedEvent even where this embed was created
+	 * @param items the items to display
+	 * @param userOnly whether or not the command sender should be the sole person to use interactions
+	 * @param embeds function that takes in an embed provided the page data
+	 * @param elementsPerPage the amount of elements visible in the page
+	 */
+	public PagedEmbed(MessageReceivedEvent event, List<String> items, boolean userOnly, Function<PagedEmbed.PagedData, EmbedBuilder> embeds, int elementsPerPage) {
+		this.page = 1;
+		this.embeds = embeds;
+		this.items = items;
+		this.elementsPerPage = elementsPerPage;
+		this.event = event;
+		this.userOnly = userOnly;
+	}
 
 	/**
 	 * @param event the MessageReceivedEvent even where this embed was created

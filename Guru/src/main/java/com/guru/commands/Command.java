@@ -11,6 +11,7 @@ import java.util.Optional;
 import com.guru.bot.Guru;
 import com.guru.commands.codewars.CodewarsCommand;
 import com.guru.credentials.Developers;
+import com.guru.paged.PagedEmbed;
 import com.guru.reflection.CommandScanner;
 import com.guru.userdata.UserModel;
 import com.guru.utils.TimeFormatter;
@@ -149,7 +150,7 @@ public abstract class Command extends ListenerAdapter{
 		
 		errorEmbed.setTitle("Error handler");
 		errorEmbed.setColor(Color.red);
-		errorEmbed.setDescription("Sorry and error has accured, please look below for details");
+		errorEmbed.setDescription("Sorry an error has accured, please look below for details");
 		
 		errorEmbed.addField("Response", "```" + response + "```", false);
 		
@@ -173,24 +174,70 @@ public abstract class Command extends ListenerAdapter{
 	protected void logError(MessageReceivedEvent event, String response, Exception e) {
 
 		try {
+			e.printStackTrace();
 			
-			EmbedBuilder errorEmbed = new EmbedBuilder();
+			String json = e.getMessage();
+			int LENGTH = 500;
+			String format = "css";
 			
-			errorEmbed.setTitle("Error handler");
-			errorEmbed.setColor(Color.red);
-			errorEmbed.setDescription("Sorry and error has accured, please look below for details");
+			if(e.getMessage().length() < LENGTH) {
+				EmbedBuilder errorEmbed = new EmbedBuilder();
+				
+				errorEmbed.setTitle("Error handler");
+				errorEmbed.setColor(Color.red);
+				errorEmbed.setDescription("Sorry and error has accured, please look below for details");
+				
+				errorEmbed.addField("Response", "```" + response + "```", false);
+				
+				errorEmbed.addField("Location", "```" + e.getStackTrace()[0] + "```", false);
+							
 			
-			errorEmbed.addField("Response", "```" + response + "```", false);
 			
-			errorEmbed.addField("Location", "```" + e.getStackTrace()[0] + "```", false);
-						
-		
-		
+				
+				errorEmbed.setFooter("if this seems unexpected, please contact @syntex#1389");
+				errorEmbed.setTimestamp(Instant.now());
+				
+				event.getMessage().replyEmbeds(errorEmbed.build()).queue();
+				
+				return;
+			}
 			
-			errorEmbed.setFooter("if this seems unexpected, please contact @syntex#1389");
-			errorEmbed.setTimestamp(Instant.now());
+			List<String> content = new ArrayList<>();
+			for(int i = 0; i < json.length(); i+=LENGTH) {
+				int min = i;
+				int max = i + LENGTH;
+				
+				if(json.length() < max) {
+					content.add(json.substring(min, json.length()));
+				}else {
+					content.add(json.substring(min, max));
+				}
+				
+			}
 			
-			event.getMessage().replyEmbeds(errorEmbed.build()).queue();
+			PagedEmbed builder = PagedEmbed.create(event, content, 1, true, page -> {
+				
+				EmbedBuilder errorEmbed = new EmbedBuilder();
+				
+				errorEmbed.setTitle("Error handler");
+				errorEmbed.setColor(Color.red);
+				errorEmbed.setDescription("Sorry and error has accured, please look below for details" + System.lineSeparator());
+				errorEmbed.appendDescription("You are currently viewing page " + page.getPage() + "/" + (page.getParent().getLastPage()-1));
+				
+				errorEmbed.addField("Response", "```" + format + System.lineSeparator() + page.getPagedElements().get(0) + "```", false);
+				
+				errorEmbed.addField("Location", "```" + format + System.lineSeparator() + e.getStackTrace()[0] + "```", false);
+
+				errorEmbed.setFooter("if this seems unexpected, please contact @syntex#1389");
+				errorEmbed.setTimestamp(Instant.now());
+				
+				return errorEmbed;
+				
+			});
+			
+			builder.sendAsReply();
+			
+			
 			
 		}catch (Exception e2) {
 			this.logError(event, e2.getLocalizedMessage(), e2);
@@ -219,7 +266,7 @@ public abstract class Command extends ListenerAdapter{
 			e.printStackTrace();
 			
 			EmbedBuilder errorEmbed = new EmbedBuilder();
-			
+	
 			errorEmbed.setTitle("Error handler");
 			errorEmbed.setColor(Color.cyan);
 			//builder.setThumbnail(event.getJDA().getSelfUser().getAvatarUrl());
@@ -263,5 +310,41 @@ public abstract class Command extends ListenerAdapter{
 	@Deprecated
 	public void onSlashCommand(SlashCommandInteractionEvent e) {}
 	
-	
+	public void sendStringMessage(String format, String json, MessageReceivedEvent event, int LENGTH) {
+		
+		if(json.length() < LENGTH) {
+			event.getMessage().reply("```" + format + System.lineSeparator()  + json +  System.lineSeparator() + "```").queue();
+			return;
+		}
+		
+		List<String> content = new ArrayList<>();
+		for(int i = 0; i < json.length(); i+=LENGTH) {
+			int min = i;
+			int max = i + LENGTH;
+			
+			if(json.length() < max) {
+				content.add(json.substring(min, json.length()));
+			}else {
+				content.add(json.substring(min, max));
+			}
+			
+		}
+		
+		PagedEmbed builder = PagedEmbed.create(event, content, 1, true, page -> {
+			
+			EmbedBuilder embedBuilder = new EmbedBuilder();
+			embedBuilder.appendDescription("You are currently viewing page " + page.getPage() + "/" + (page.getParent().getLastPage()-1));
+			
+			page.getPagedElements().forEach(o -> {
+			
+				embedBuilder.appendDescription("```" + format + System.lineSeparator() + o + System.lineSeparator() + "```");
+				
+			});
+			return embedBuilder;
+			
+		});
+		
+		builder.sendAsReply();
+		
+	}
 }

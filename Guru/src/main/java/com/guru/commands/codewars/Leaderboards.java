@@ -26,7 +26,7 @@ public class Leaderboards extends CodewarsCommand{
 		embedBuilder.setTitle("Codewars profile");
 		embedBuilder.setColor(Color.cyan);
 		embedBuilder.setThumbnail(event.getJDA().getSelfUser().getAvatarUrl());
-		embedBuilder.setDescription("here is the leaderboard, do keep in mind that this data might be outdata, in order for a users data to update, they should use any codewars command, as userdata updates once every 10 minutes ( triggered by doing a codewars command ), except for ;leaderboard");
+		embedBuilder.setDescription("here is the leaderboard, do keep in mind that this data might be outdated.");
 		
 		for(int i = 0; i < z.size(); i++) {
 			UserModel data = z.get(i);

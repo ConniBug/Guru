@@ -54,7 +54,7 @@ public class Stats extends CodewarsCommand{
 			
 			
 		}
-
+		
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		
 		embedBuilder.setTitle("Codewars profile");

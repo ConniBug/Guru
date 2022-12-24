@@ -73,7 +73,7 @@ public class UsersHandler {
 	public boolean needsUpdating(String id) {
 		Date now = new Date();
 		
-		if(!this.lastUpdated.containsKey(id) && this.users.stream().filter(o -> o.getUserID().equals(id)).count() > 0) {
+		if(!this.lastUpdated.containsKey(id) || !(this.users.stream().filter(o -> o.getUserID().equals(id)).count() > 0)) {
 			return true;
 		}
 		

@@ -76,47 +76,6 @@ public class RandomChallenge extends CodewarsCommand{
 		
 		event.getMessage().replyEmbeds(embedBuilder.build()).queue();
 		
-		
-		/*
-		File[] file = new File(Guru.getInstance().getManagement().getFiles(), "katas").listFiles();
-		
-		JSONObject data = new JSONObject(FileUtils.readFileToString(file[ThreadLocalRandom.current().nextInt(file.length)], "UTF-8"));
-		
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-		
-		embedBuilder.setTitle(data.getString("name") + " - " + data.getJSONObject("rank").getString("name"), "https://www.codewars.com/kata/" + data.getString("id"));
-		
-		switch (data.getJSONObject("rank").getString("color")) {
-		case "yellow":
-			embedBuilder.setColor(Color.yellow);
-			break;
-		case "blue":
-			embedBuilder.setColor(Color.cyan);
-			break;
-		default:
-			break;
-		}
-		
-		String desc = data.getString("description").replaceAll("<[^>]*>", "");
-		
-		if(desc.length() > 4000) {
-			desc = desc.substring(0, 4000) + " *(" + (desc.length()-4000) + System.lineSeparator() + " more lines... )*";
-		}
-		
-		if(desc.contains("<img src=\"")) {
-			embedBuilder.setThumbnail(desc.split("<img src=\"")[1].split("\"")[0]);
-		}
-		
-		if(desc.contains("<img src = '")) {
-			embedBuilder.setThumbnail(desc.split("<img src = '")[1].split("'")[0]);
-		}
-		
-		
-		embedBuilder.setDescription(desc.replaceAll("<[^>]*>", ""));
-		
-		
-		event.getMessage().replyEmbeds(embedBuilder.build()).queue();
-		*/
 	}
 	
 	public void jsonToEmbed(MessageReceivedEvent event, JSONObject data) {
