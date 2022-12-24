@@ -70,13 +70,11 @@ public class UsersHandler {
 		this.memoryManagement = memoryManagement;
 	}
 	
-	public void update(String id) {
-		
+	public boolean needsUpdating(String id) {
 		Date now = new Date();
 		
-		if(!this.lastUpdated.containsKey(id)) {
-			this.cashe(id);
-			return;
+		if(!this.lastUpdated.containsKey(id) && this.users.stream().filter(o -> o.getUserID().equals(id)).count() > 0) {
+			return true;
 		}
 		
 		Date lastUpdated = this.lastUpdated.get(id);
@@ -84,19 +82,43 @@ public class UsersHandler {
 		long difference = now.getTime() - lastUpdated.getTime();
 		
 		if(difference < UPDATE_TIMER) {
+			return false;
+		}
+
+		return true;
+	}
+	
+	public void update(UserModel data) {
+		
+		Date now = new Date();
+		
+		if(!this.lastUpdated.containsKey(data.getUserID())) {
+			Logger.INFO("Updating cashe of " + data.getUserID());
+			this.cashe(data);
 			return;
 		}
 		
-		this.cashe(id);
+		Date lastUpdated = this.lastUpdated.get(data.getUserID());
+		
+		long difference = now.getTime() - lastUpdated.getTime();
+		
+		if(difference < UPDATE_TIMER) {
+			return;
+		}
+		
+		Logger.INFO("Updating cashe of " + data.getUserID());
+		this.cashe(data);
 		
 	}
 	
-	public void cashe(String id) {
+	public void cashe(UserModel data) {
 		Date now = new Date();
+
+		if(!data.getCodewars().isRegistered()) {
+			return;
+		}
 		
-		Logger.INFO("Updated cashe for " + id);
-		
-		UserModel data = this.users.stream().filter(o -> o.getUserID().equals(id)).findFirst().get();
+		Logger.INFO("Updated cashe for " + data.getUserID());
 		
 		CodewarsProfile updatedProfile = new CodewarsProfile(data.getCodewars().getProfile(),
 															 CodewarsMeta.fromName(data.getCodewars().getName()),
@@ -105,7 +127,7 @@ public class UsersHandler {
 		data.setCodewars(updatedProfile);
 		data.save();
 		
-		this.lastUpdated.put(id, now);
+		this.lastUpdated.put(data.getUserID(), now);
 	
 		int value = data.getCodewars().getMeta().getRanks().getOverall().getRank();
 		Ranks rank = Ranks.fromValue(value);
@@ -114,7 +136,7 @@ public class UsersHandler {
 			Optional<Role> roles = o.getRoles().stream().filter(k -> k.getId().equals(rank.getID())).findFirst();
 			if(roles.isPresent()) {
 				new Thread(() -> {
-					o.loadMembers().get().stream().filter(k -> k.getId().equals(id)).findFirst().ifPresent(p -> {
+					o.loadMembers().get().stream().filter(k -> k.getId().equals(data.getUserID())).findFirst().ifPresent(p -> {
 						o.addRoleToMember(p, roles.get()).queue();
 						System.out.println("saved " + p.getEffectiveName());
 					});
@@ -134,13 +156,15 @@ public class UsersHandler {
 		Optional<UserModel> data = this.users.stream().filter(o -> o.getUserID().equals(id)).findFirst();
 		
 		if(data.isPresent()) {
-			this.update(id);
+			this.update(data.get());
 			return data.get();
 		}
 	
 		UserModel user = UserModel.empty(id);
 		
 		this.users.add(user);
+		
+		Logger.INFO("added user -> " + user);
 
 		return user;
 	}
@@ -155,7 +179,7 @@ public class UsersHandler {
 		Optional<UserModel> data = this.users.stream().filter(o -> o.getUserID().equals(user.getId())).findFirst();
 		
 		if(data.isPresent()) {
-			this.update(user.getId());
+			this.update(data.get());
 			return data.get().feedUser(user);
 		}
 		
@@ -176,7 +200,7 @@ public class UsersHandler {
 		Optional<UserModel> data = this.users.stream().filter(o -> o.getUserID().equals(user.getId())).findFirst();
 		
 		if(data.isPresent()) {
-			this.update(user.getId());
+			this.update(data.get());
 			return data.get().feedUser(user);
 		}
 		

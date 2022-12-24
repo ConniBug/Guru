@@ -41,7 +41,7 @@ public class MemoryManagement {
 		try {
 			
 		//load default json files
-		File path = new File(MemoryManagement.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
+		File path = new File(MemoryManagement.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
 		this.res = new File(path, "configuration");
 		this.setFiles(new File(path, "files"));
 		

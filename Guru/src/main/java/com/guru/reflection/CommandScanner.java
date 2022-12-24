@@ -47,7 +47,7 @@ public class CommandScanner {
 			try {
 				
 				//create a new instance of the implementation, down casting it to command
-				Command command = (Command)type.newInstance();
+				Command command = (Command)type.getDeclaredConstructor().newInstance();
 
 				//used to find the path of the config for this command
 				String folder = COMMANDS_FOLDER + ".";

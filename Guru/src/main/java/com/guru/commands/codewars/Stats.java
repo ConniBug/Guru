@@ -8,23 +8,27 @@ import com.google.gson.GsonBuilder;
 import com.guru.bot.Guru;
 import com.guru.codewars.modals.CodewarsMeta;
 import com.guru.commands.Category;
-import com.guru.commands.Command;
 import com.guru.commands.CommandMeta;
 import com.guru.userdata.UserModel;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 @CommandMeta(name = {"cstats", "cprofile", "codewarsstats"}, description = "Displays a users codewars stats", category = Category.CODEWARS, usage = {"cstats", "cstats <@user>"})
-public class Stats extends Command{
+public class Stats extends CodewarsCommand{
 
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 		
-		System.out.println(args.length);
 		
-		//StringBuilder name = new StringBuilder();
+		Message updateHandler;
+		
+		updateHandler = this.sendUpdateMessage(event.getAuthor().getId(), event);
+
+		UserModel model = this.getUserModel(event);;
 		
 		CodewarsMeta meta = null;
 		
@@ -37,13 +41,6 @@ public class Stats extends Command{
 			}
 			meta = model.getCodewars().getMeta();
 		}else {
-			//for(int i = 1; i < args.length; i++) {
-			//	name.append(args[i] + " ");
-			//}
-			//String json = Network.readURL("https://www.codewars.com/api/v1/users/" + name.toString().trim().replace(" ", "%20").trim());
-			
-			//meta = gson.fromJson(json, CodewarsMeta.class);	
-			
 				List<User> a = event.getMessage().getMentions().getUsers();
 				if(a.size() > 0) {
 					model = Guru.getInstance().getUsersHandler().getUserData(a.get(0));
@@ -62,19 +59,17 @@ public class Stats extends Command{
 		
 		embedBuilder.setTitle("Codewars profile");
 		embedBuilder.setColor(Color.orange);
-		//embedBuilder.setDescription("here is " + meta.getName() + " profile, this user is ranked #" + meta.getRanks() + " globaly.");
-		
-		//embedBuilder.addField("Id" , "```" + obj.get("id") + "```", false);
-		//embedBuilder.addField("Global Rank" , "```" + obj.get("leaderboardPosition") + "```", false);
-		//embedBuilder.addField("Honor" , "```" + obj.get("honor") + "```", true);
-		//embedBuilder.addField("Clan" , "```" + obj.get("clan") + "```", true);
-		//embedBuilder.addField("Completed Kata" , "```" + obj.getJSONObject("codeChallenges").get("totalCompleted") + "```", true);
-		
+	
 		embedBuilder.setDescription("```json" + System.lineSeparator() + gson.toJson(meta) + "```");
 		
 		embedBuilder.setFooter("if this seems unexpected, please contact @syntex#1389");
 		
-		event.getMessage().replyEmbeds(embedBuilder.build()).queue();
+		if(updateHandler == null) {
+			event.getMessage().replyEmbeds(embedBuilder.build()).queue();
+		}else {
+			MessageEditBuilder msg = MessageEditBuilder.fromMessage(updateHandler).clear().setEmbeds(embedBuilder.build());
+			updateHandler.editMessage(msg.build()).queue();	
+		}
 		
 	}
 

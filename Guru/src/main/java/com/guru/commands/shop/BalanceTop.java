@@ -27,7 +27,7 @@ public class BalanceTop extends Command{
 	}
 	
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 
 		
 		List<UserModel> richest = Guru.getInstance().getUsersHandler().getUsers().stream().sorted((a, b) -> b.getBablons() - a.getBablons()).limit(5).collect(Collectors.toList());

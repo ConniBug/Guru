@@ -10,11 +10,12 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import com.guru.logger.Logger;
+import com.guru.commands.help.Help;
 import com.guru.reflection.CommandScanner;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -67,8 +68,6 @@ public final class CommandManager extends ListenerAdapter{
 			System.exit(0);
 		}
 		
-		
-		
 	}
 
 	/**
@@ -114,13 +113,30 @@ public final class CommandManager extends ListenerAdapter{
 	}
 	
 	
+	@Override
+	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+		super.onSlashCommandInteraction(event);
+		if(event.getFullCommandName().startsWith("help")) {
+			event.replyEmbeds(new Help().genericHelpMenu()).queue();
+			event.deferReply().queue();
+		}
+	}
 	
-	@Deprecated
-	public void onGuildReady1(GuildReadyEvent event) {
+	@Override
+	public void onGuildReady(GuildReadyEvent event) {
 		// TODO Auto-generated method stub
 		super.onGuildReady(event);
 		
+		Guild guild = event.getGuild();
 		
+		SlashCommandData slashCommand = Commands.slash("help", "shows the help command");
+		
+		List<SlashCommandData> cmds = new ArrayList<>();
+		cmds.add(slashCommand);
+		
+		guild.updateCommands().addCommands(cmds).queue();
+		
+		/*
 		while(!this.command_loaded) {
 			Logger.INFO("Waiting for commands to load, before adding guild commands.");
 			try {
@@ -154,6 +170,7 @@ public final class CommandManager extends ListenerAdapter{
 		});
 
 		guild.updateCommands().addCommands(cmds).queue();
+		*/
 		
 	}
 	 

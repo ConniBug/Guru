@@ -1,8 +1,8 @@
 package com.guru.commands.codewars;
 
 import java.awt.Color;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
@@ -10,31 +10,36 @@ import org.json.JSONObject;
 import com.guru.bot.Guru;
 import com.guru.codewars.kata.Kata;
 import com.guru.commands.Category;
-import com.guru.commands.Command;
 import com.guru.commands.CommandMeta;
-import com.guru.userdata.UserModel;
+import com.syngen.engine.Numbers;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-@CommandMeta(name = {"challenge"}, description = "returns a random codewars challenge", category = Category.CODEWARS, usage = {"challenge"}, cooldown = 60*5)
-public class RandomChallenge extends Command{
+@CommandMeta(name = {"challenge"}, description = "returns a random codewars challenge", category = Category.CODEWARS, usage = {"challenge", "challenge {kata}"}, cooldown = 60*5)
+public class RandomChallenge extends CodewarsCommand{
 
 	private final int[] difficulty = {4,5,6,7};
 	
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
+		
+		int diff = difficulty[ThreadLocalRandom.current().nextInt(difficulty.length)];
+		
+		if(args.length == 2) {
+			if(Numbers.isNumber(args[1])) {
+				diff = Numbers.getNumber(args[1]);
+			}
+		}
+		
+		final int d = diff;
 		
 		List<Kata> katas = Guru.getInstance().getKataCasher().getKatas().get().stream().filter(o -> {
-			for(int k : difficulty) {
-				if(o.getRankObject().getId() == k*-1) return true;
-			}
+			if(o.getRankObject().getId() == d*-1) return true;
 			return false;
 		}).collect(Collectors.toList());
 		
-		Collections.shuffle(katas);
-		
-		Kata kata = katas.get(0);
+		Kata kata = katas.get(ThreadLocalRandom.current().nextInt(katas.size()));
 		
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		

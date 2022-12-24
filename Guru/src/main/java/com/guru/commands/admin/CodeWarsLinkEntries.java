@@ -17,25 +17,30 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class CodeWarsLinkEntries extends Command{
 
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 		
-		List<UserModel> users = Guru.getInstance().getUsersHandler().getUsers().stream().filter(o -> !o.getLink().isEmpty()).limit(10).collect(Collectors.toList());
-		
-		long amount = Guru.getInstance().getUsersHandler().getUsers().stream().filter(o -> !o.getLink().isEmpty()).count();
-		
-		EmbedBuilder entries = new EmbedBuilder();
-		entries.setTitle("Entries");
-		entries.setDescription("Showing " + users.size() + "/" + amount + " users.");
-		entries.setColor(Color.green);
-		
-		
-		for(int i = 0; i < users.size(); i++) {
-			UserModel user = users.get(i);
-			entries.addField(event.getGuild().getMemberById(user.getUserID()).getEffectiveName(), user.getLink(), false);
-		}
-		
-		event.getMessage().replyEmbeds(entries.build()).queue();
-		
+		new Thread(() -> {
+	
+			List<UserModel> users = Guru.getInstance().getUsersHandler().getUsers().stream().filter(o -> !o.getLink().isEmpty()).limit(10).collect(Collectors.toList());
+			
+			long amount = Guru.getInstance().getUsersHandler().getUsers().stream().filter(o -> !o.getLink().isEmpty()).count();
+			
+			EmbedBuilder entries = new EmbedBuilder();
+			entries.setTitle("Entries");
+			entries.setDescription("Showing " + users.size() + "/" + amount + " users.");
+			entries.setColor(Color.green);
+			
+			
+			for(int i = 0; i < users.size(); i++) {
+				UserModel user = users.get(i);
+				entries.addField(event.getGuild().getMemberById(user.getUserID()).getEffectiveName(), user.getLink(), false);
+			}
+			
+			event.getMessage().replyEmbeds(entries.build()).queue();
+			
+			
+		}).start();
+	
 	}
 
 	

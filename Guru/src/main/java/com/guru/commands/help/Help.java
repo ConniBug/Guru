@@ -8,7 +8,6 @@ import com.guru.commands.Category;
 import com.guru.commands.Command;
 import com.guru.commands.CommandMeta;
 import com.guru.data.SerializableField;
-import com.guru.userdata.UserModel;
 import com.guru.utils.PrettyString;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -28,7 +27,7 @@ public class Help extends Command{
 	private String invalid_command = "The command {cmd} does not exist!";
 	
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 		
 		if(args.length > 1) {
 			event.getMessage().replyEmbeds(this.sendCommandDetails(args[1])).queue();

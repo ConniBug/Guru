@@ -36,7 +36,7 @@ public class ShopScanner {
 			try {
 				
 				//create a new instance of the implementation, down casting it to command
-				ShopItem command = (ShopItem)type.newInstance();
+				ShopItem command = (ShopItem)type.getDeclaredConstructor().newInstance();
 				
 
 				//log entry

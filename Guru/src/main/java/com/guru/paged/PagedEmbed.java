@@ -1,5 +1,6 @@
-package com.guru.commands.help;
+package com.guru.paged;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -9,6 +10,7 @@ import java.util.function.Function;
 import com.guru.bot.Guru;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -33,6 +35,42 @@ public class PagedEmbed extends ListenerAdapter{
 	
 	private MessageCreateAction message;
 
+	public void setEmbeds(Function<PagedEmbed.PagedData, EmbedBuilder> embeds) {
+		this.embeds = embeds;
+	}
+
+	public void setElementsPerPage(int elementsPerPage) {
+		this.elementsPerPage = elementsPerPage;
+	}
+
+	public void setItems(List<String> items) {
+		this.items = items;
+	}
+
+	public void setEvent(MessageReceivedEvent event) {
+		this.event = event;
+	}
+
+	public void setStart(Date start) {
+		this.start = start;
+	}
+
+	public void setUserOnly(boolean userOnly) {
+		this.userOnly = userOnly;
+	}
+
+	public void setBackID(String backID) {
+		this.backID = backID;
+	}
+
+	public void setNextID(String nextID) {
+		this.nextID = nextID;
+	}
+
+	public void setMessage(MessageCreateAction message) {
+		this.message = message;
+	}
+	
 	public class PagedData{
 		private final List<String> pagedElements;
 		private final int page;
@@ -169,9 +207,33 @@ public class PagedEmbed extends ListenerAdapter{
 		Button back = Button.of(ButtonStyle.SECONDARY, this.backID, "Previous");
 		Button front = Button.of(ButtonStyle.SECONDARY, this.nextID, "Next");
 		
-		this.message = this.event.getMessage().replyEmbeds(this.build().build()).addActionRow(back, front);
+		List<Button> buttons = new ArrayList<>();
+		buttons.add(back);
+		buttons.add(front);
+		
+		this.message = this.event.getMessage().replyEmbeds(this.build().build()).addActionRow(buttons);
 		this.message.queue();
 		
+	}
+	
+	
+	public void fromMessage(Message message) {
+		
+		this.start = new Date();
+		
+		this.backID = UUID.randomUUID().toString();
+		this.nextID = UUID.randomUUID().toString();
+		
+		Button back = Button.of(ButtonStyle.SECONDARY, this.backID, "Previous");
+		Button front = Button.of(ButtonStyle.SECONDARY, this.nextID, "Next");
+		
+		List<Button> buttons = new ArrayList<>();
+		buttons.add(back);
+		buttons.add(front);
+		
+		MessageEditBuilder msg = MessageEditBuilder.fromMessage(message).clear().setActionRow(buttons).setEmbeds(this.build().build());
+		message.editMessage(msg.build()).queue();
+
 	}
 	
 	@Override
@@ -192,13 +254,19 @@ public class PagedEmbed extends ListenerAdapter{
 		Button back = Button.of(ButtonStyle.SECONDARY, this.backID, "Previous");
 		Button front = Button.of(ButtonStyle.SECONDARY, this.nextID, "Next");
 		
+		List<Button> buttons = new ArrayList<>();
+		buttons.add(back);
+		buttons.add(front);
+		
 		if(event.getButton().getId().equals(backID)) {
+			
 			MessageEditBuilder msg = MessageEditBuilder.fromMessage(event.getMessage()).clear().setEmbeds(this.prev().build().build());
-			event.deferEdit().applyData(msg.build()).setActionRow(back, front).queue();
+			event.deferEdit().applyData(msg.build()).setActionRow(buttons).queue();
 		}
 		if(event.getButton().getId().equals(nextID)) {
+			
 			MessageEditBuilder msg = MessageEditBuilder.fromMessage(event.getMessage()).clear().setEmbeds(this.next().build().build());
-			event.deferEdit().applyData(msg.build()).setActionRow(back, front).queue();
+			event.deferEdit().applyData(msg.build()).setActionRow(buttons).queue();
 		}
 	}
 
@@ -241,7 +309,6 @@ public class PagedEmbed extends ListenerAdapter{
 	public MessageCreateAction getMessage() {
 		return message;
 	}
-	
 	
 
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.guru.bot.Guru;
+import com.guru.commands.codewars.CodewarsCommand;
 import com.guru.credentials.Developers;
 import com.guru.reflection.CommandScanner;
 import com.guru.userdata.UserModel;
@@ -103,8 +104,14 @@ public abstract class Command extends ListenerAdapter{
 							}
 						}
 						
-						//run the command
-						this.onCommand(event, rawMessage, Guru.getInstance().getUsersHandler().getUserData(event.getAuthor().getId()));
+						if(this instanceof CodewarsCommand) {
+							//run the codewars command, same as command for now
+							this.onCommand(event, rawMessage);
+						}else {
+							//run the command
+							this.onCommand(event, rawMessage);	
+						}
+						
 						
 						//add the cooldown
 						this.cooldowns.add(new Cooldown(event.getAuthor().getId(), this, new Date()));
@@ -195,16 +202,15 @@ public abstract class Command extends ListenerAdapter{
 	 * this method has been temporarily removed.
 	 * 
 	 */
-	@Override
 	@Deprecated
-	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public void onSlashCommandInteraction1(SlashCommandInteractionEvent event) {
 		// TODO Auto-generated method stub
 		super.onSlashCommandInteraction(event);
 		
 		
 		try {
 			
-			//this.onSlashCommand(event);
+			this.onSlashCommand(event);
 			//GenericMessageSendEvent e = new GenericMessageSendEvent(event);
 			//String[] args = event.getCommandString().substring(1).split(" ");
 			//this.onCommand(event, args);
@@ -232,7 +238,7 @@ public abstract class Command extends ListenerAdapter{
 	 * @param userModel 
 	 * @param MessageReceivedEvent of the message
 	 */
-	public abstract void onCommand(MessageReceivedEvent event, String[] args, UserModel userModel) throws Exception;
+	public abstract void onCommand(MessageReceivedEvent event, String[] args) throws Exception;
 
 	/**
 	 * wether or not this command can be used by normal users
@@ -249,6 +255,13 @@ public abstract class Command extends ListenerAdapter{
 	public void setAvailable(boolean available) {
 		this.available = available;
 	}
+	
+	public UserModel getUserModel(MessageReceivedEvent event) {
+		return Guru.getInstance().getUsersHandler().getUserData(event.getAuthor());
+	}
+	
+	@Deprecated
+	public void onSlashCommand(SlashCommandInteractionEvent e) {}
 	
 	
 }

@@ -28,7 +28,7 @@ public class Pay extends Command{
 	}
 	
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 		
 		Member user = event.getMember();
 		

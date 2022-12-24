@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
 import com.guru.commands.Category;
 import com.guru.commands.Command;
 import com.guru.commands.CommandMeta;
-import com.guru.userdata.UserModel;
+import com.guru.paged.PagedEmbed;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -24,7 +24,7 @@ public class PageTest extends Command{
 
 	
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 	
 		
 		//event.getMessage().replyEmbeds(builder.build()).queue();

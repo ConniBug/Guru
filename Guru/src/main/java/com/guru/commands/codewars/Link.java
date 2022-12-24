@@ -3,7 +3,6 @@ package com.guru.commands.codewars;
 import java.awt.Color;
 
 import com.guru.commands.Category;
-import com.guru.commands.Command;
 import com.guru.commands.CommandMeta;
 import com.guru.userdata.UserModel;
 
@@ -17,10 +16,10 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
  *
  */
 @CommandMeta(name = {"link"}, cooldown = 10L, description = "links your codewars account to discord, will require verification. please include something in your codewars profile to help us identify it's really you, such as leaving your discord name in the description or having the same profile, if it's not clear we may ask you some questions for verification.", category = Category.CODEWARS, usage = {"link <name>", "link <url>"})
-public class Link extends Command{
+public class Link extends CodewarsCommand{
 
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 
 		if(args.length == 1 || !args[1].startsWith("https://www.codewars.com/users/")) {
 			throw new Exception("please do ;link https://www.codewars.com/users/{YOURNAME}");
@@ -43,6 +42,7 @@ public class Link extends Command{
 		
 		event.getMessage().replyEmbeds(embedBuilder.build()).queue();
 		
+		UserModel model = this.getUserModel(event);
 		model.createCodeWarsLink(name.toString().trim());
 		model.save();
 		

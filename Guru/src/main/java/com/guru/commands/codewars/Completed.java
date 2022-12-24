@@ -4,89 +4,86 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import com.guru.bot.Guru;
 import com.guru.codewars.kata.Kata;
 import com.guru.codewars.users.katas.Datum;
 import com.guru.commands.Category;
-import com.guru.commands.Command;
 import com.guru.commands.CommandMeta;
-import com.guru.commands.help.PagedEmbed;
+import com.guru.paged.PagedEmbed;
 import com.guru.userdata.UserModel;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 @CommandMeta(name = {"ckatas", "katas"}, description = "shows all katas the user has completed", category = Category.CODEWARS, usage = {"katas", "katas <@user>"})
-public class Completed extends Command{
+public class Completed extends CodewarsCommand{
 
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel m) throws Exception {
-		
-		int counter = 0;
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 		
 		List<Member> mentions = event.getMessage().getMentions().getMembers();
+
+		UserModel model;
 		
-		UserModel model = m;
+		Message updateHandler = null;
 		
 		if(mentions.size() > 0) {
+			
+			Member member = mentions.get(0);
+			
+			updateHandler = this.sendUpdateMessage(member.getId(), event);
+			
 			model = Guru.getInstance().getUsersHandler().getUserData(mentions.get(0));
+			
+		}else {
+			
+			updateHandler = this.sendUpdateMessage(event.getAuthor().getId(), event);
+			
+			model = this.getUserModel(event);
+			
 		}
 		
 		if(!model.getCodewars().isRegistered()) {
 			throw new Exception("Sorry, you need to link your account first.");
 		}
-		
-		//List<Datum> data = model.getCashedKatas();
-		
-		/*
-		if(data == null || data.isEmpty()) {
-			
-			System.out.println("cashing");
 
-			data = model.getKatasSorted((a, b) -> {
-				
-				try {
-					
-					Optional<Kata> kata1 = Guru.getInstance().getKataCasher().getKataFromId(a.id).get();
-					Optional<Kata> kata2 = Guru.getInstance().getKataCasher().getKataFromId(b.id).get();
-					
-					if(kata1.isPresent() && kata2.isPresent()) {
-						
-						int rank1 = (int)kata1.get().getRankObject().getId()*-1;
-						int rank2 = (int)kata2.get().getRankObject().getId()*-1;
-						
-						return rank1 - rank2;	
-					}
-					
-					if(kata1.isPresent() && !kata2.isPresent()) {
-						return -1;
-					}
-					
-					if(!kata1.isPresent() && kata2.isPresent()) {
-						return 1;
-					}
-					
-				}catch (Throwable e) {
-					e.printStackTrace();
-				}
-				
-				
-				return 0;
-			}).get().stream().collect(Collectors.toList());
+		List<String> completed = this.getSortedkatas(model);
+		
+		PagedEmbed embed = PagedEmbed.create(event, completed, 15, false, o -> {	
+			EmbedBuilder embedBuilder = new EmbedBuilder();
+			embedBuilder.setTitle("Codewars profile");
+			embedBuilder.setColor(Color.cyan);
+			embedBuilder.setThumbnail(event.getJDA().getSelfUser().getAvatarUrl());
 			
-			model.setKatas(data);
-			model.save();
+			embedBuilder.setDescription("here are the first 200 katas you've done. page " + o.getPage() + "/" + o.getParent().getLastPage());
 			
+			embedBuilder.appendDescription(System.lineSeparator());
+			
+			o.forEach(kata -> {
+				embedBuilder.appendDescription(System.lineSeparator());
+				embedBuilder.appendDescription(kata);
+			});
+		
+			return embedBuilder;
+		});
+		
+		if(updateHandler == null) {
+			embed.sendAsReply();
+		}else {
+			embed.fromMessage(updateHandler);			
 		}
-		*/
-		
-		//List<Datum> data = model.getKatas().get().stream().limit(35).collect(Collectors.toList());
-		
-		//embedBuilder.appendDescription(System.lineSeparator());
+	
+	}
+	
+	public List<String> getSortedkatas(UserModel model) throws InterruptedException, ExecutionException {
 		
 		List<String> completed = new ArrayList<>();
+		
+		int counter = 0;
 		
 		for(Datum o : model.getCodewars().getKatasSorted()) {
 			Optional<Kata> kata = Guru.getInstance().getKataCasher().getKataFromId(o.id).get();
@@ -115,29 +112,7 @@ public class Completed extends Command{
 			
 		}
 		
-		PagedEmbed embed = PagedEmbed.create(event, completed, 15, false, o -> {
-			
-			EmbedBuilder embedBuilder = new EmbedBuilder();
-			embedBuilder.setTitle("Codewars profile");
-			embedBuilder.setColor(Color.cyan);
-			embedBuilder.setThumbnail(event.getJDA().getSelfUser().getAvatarUrl());
-			
-			embedBuilder.setDescription("here are the first 200 katas you've done. page " + o.getPage() + "/" + o.getParent().getLastPage());
-			
-			embedBuilder.appendDescription(System.lineSeparator());
-			
-			o.forEach(kata -> {
-				embedBuilder.appendDescription(System.lineSeparator());
-				embedBuilder.appendDescription(kata);
-			});
-		
-			return embedBuilder;
-		});
-		
-		embed.sendAsReply();
-		
-	
-		//event.getMessage().replyEmbeds(embedBuilder.build()).queue();
+		return completed;
 	}
 
 }

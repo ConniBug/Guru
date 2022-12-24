@@ -252,16 +252,20 @@ public class UserModel {
 	}
 	
 	public static UserModel empty(String id) {
-		return new UserModel(id, 0, Arrays.asList(), "", new CodewarsProfile("", null, null), "", Arrays.asList());
+		UserModel model = new UserModel(id, 0, Arrays.asList(), "", new CodewarsProfile("", null, null), "", Arrays.asList());
+		return model;
 	}
 	
 	public static UserModel empty(User id) {
-		return new UserModel(id.getId(), 0, Arrays.asList(), "", new CodewarsProfile("", null, null), id.getName(), Arrays.asList());
+		UserModel model = new UserModel(id.getId(), 0, Arrays.asList(), "", new CodewarsProfile("", null, null), id.getName(), Arrays.asList());
+		return model;
 	}
 	
 	public static UserModel empty(Member id) {
-		return new UserModel(id.getId(), 0, Arrays.asList(), "", new CodewarsProfile("", null, null), id.getEffectiveName(), Arrays.asList());
+		UserModel model = new UserModel(id.getId(), 0, Arrays.asList(), "", new CodewarsProfile("", null, null), id.getEffectiveName(), Arrays.asList());
+		return model;
 	}
+	
 	
 	
 	@Override

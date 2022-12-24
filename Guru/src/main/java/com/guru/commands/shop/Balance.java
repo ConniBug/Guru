@@ -27,7 +27,7 @@ public class Balance extends Command{
 	}
 	
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 
 		String user = event.getAuthor().getId();
 		String name = event.getAuthor().getName();

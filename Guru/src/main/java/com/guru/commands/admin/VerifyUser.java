@@ -20,14 +20,13 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class VerifyUser extends Command{
 
 	@Override
-	public void onCommand(MessageReceivedEvent event, String[] args, UserModel model) throws Exception {
+	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 		
 		if(args.length != 1) {
 			List<User> a = event.getMessage().getMentions().getUsers();
 			if(a.size() > 0) {
 				
 				UserModel data = Guru.getInstance().getUsersHandler().getUserData(a.get(0));
-				data.setLink("");
 				
 				System.out.println(data);
 
@@ -37,6 +36,8 @@ public class VerifyUser extends Command{
 				
 				CodewarsProfile profile = new CodewarsProfile(data.getLink(), meta, katas);
 				data.setCodewars(profile);
+				data.setLink("");
+				
 				data.save();
 				
 				EmbedBuilder entries = new EmbedBuilder();
