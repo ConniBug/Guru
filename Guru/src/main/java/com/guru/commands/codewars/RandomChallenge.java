@@ -16,7 +16,7 @@ import com.syngen.engine.Numbers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-@CommandMeta(name = {"challenge"}, description = "returns a random codewars challenge", category = Category.CODEWARS, usage = {"challenge", "challenge {kata}"}, cooldown = 60*5)
+@CommandMeta(name = {"challenge", "puzzle"}, description = "returns a random codewars challenge", category = Category.CODEWARS, usage = {"challenge", "challenge {kata}"}, cooldown = 60*5)
 public class RandomChallenge extends CodewarsCommand{
 
 	private final int[] difficulty = {4,5,6,7};

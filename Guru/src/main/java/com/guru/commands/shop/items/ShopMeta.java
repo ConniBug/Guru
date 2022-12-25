@@ -39,6 +39,12 @@ public @interface ShopMeta {
      * @return the description for this item
      */
     public String description();
+    
+    /**
+     * 
+     * @return the id of this item
+     */
+    public int id();
 
 }
 

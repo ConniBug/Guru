@@ -19,8 +19,9 @@ import com.google.gson.annotations.SerializedName;
 import com.guru.bot.Guru;
 import com.guru.codewars.users.katas.CompletedKata;
 import com.guru.codewars.users.katas.Datum;
-import com.guru.commands.shop.Transaction;
-import com.guru.commands.shop.TransactionType;
+import com.guru.shop.Inventory;
+import com.guru.shop.Transaction;
+import com.guru.shop.TransactionType;
 import com.guru.utils.Network;
 
 import net.dv8tion.jda.api.entities.Member;
@@ -53,6 +54,9 @@ public class UserModel {
 	@SerializedName("codewars")
 	private CodewarsProfile codewars;
 	
+	@SerializedName("inventory")
+	private Inventory inventory;
+	
 	public String getUserID() {
 		return userID;
 	}
@@ -67,7 +71,7 @@ public class UserModel {
 		
 		return bablons;
 	}
-	
+
 	public List<Datum> getCashedKatas() {
 		return this.katas;
 	}
@@ -301,8 +305,21 @@ public class UserModel {
 	public CodewarsProfile getCodewars() {
 		return codewars;
 	}
+	public Inventory getInventory() {
+		if(this.inventory == null) {
+			this.inventory = new Inventory();
+		}
+		return inventory;
+	}
+	public void setInventory(Inventory inventory) {
+		this.inventory = inventory;
+	}
 	public void setCodewars(CodewarsProfile codewars) {
 		this.codewars = codewars;
 	}
+	public List<Datum> getKatas() {
+		return katas;
+	}
+
 
 }

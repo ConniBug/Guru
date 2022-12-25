@@ -1,4 +1,4 @@
-package com.guru.commands.shop;
+package com.guru.commands.money;
 
 import java.awt.Color;
 import java.util.List;

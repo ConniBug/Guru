@@ -1,4 +1,4 @@
-package com.guru.commands.shop;
+package com.guru.shop;
 
 import java.util.Date;
 

@@ -2,6 +2,7 @@ package com.guru.reflection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,62 +47,68 @@ public class CommandScanner {
 
 			try {
 				
-				//create a new instance of the implementation, down casting it to command
-				Command command = (Command)type.getDeclaredConstructor().newInstance();
-
-				//used to find the path of the config for this command
-				String folder = COMMANDS_FOLDER + ".";
-				
-				
-				for(Field field : type.getDeclaredFields()){
-				
-					//check if the fields needs a variable inject, by checking for the seializablefield
-					for(Annotation annotation : field.getAnnotations()){
-						
-						//check if the annotation exists.
-						if(annotation.annotationType().equals(SerializableField.class)) {
-
-							//inject data to field
-							JSONObject json = memoryManagement.retrieveJsonConfiguration(folder + type.getSimpleName());
+			     //prevent abstract classes from being instantiated.
+				 if(!Modifier.isAbstract(clazz.getModifiers())) {
+					
+					//create a new instance of the implementation, down casting it to command
+					Command command = (Command)type.getDeclaredConstructor().newInstance();
 	
-							//retrieve the annotation
-							SerializableField fieldData = (SerializableField)annotation;
+					//used to find the path of the config for this command
+					String folder = COMMANDS_FOLDER + ".";
+					
+					
+					for(Field field : type.getDeclaredFields()){
+					
+						//check if the fields needs a variable inject, by checking for the seializablefield
+						for(Annotation annotation : field.getAnnotations()){
 							
-							//find the path of the variable in the json configuration
-							String[] path = fieldData.path().split("[.]");
-							
-							//find the jsonObject storing the variable
-							JSONObject loc = json;
-							for(int i = 0; i < path.length; i++) {
-								if((i+1) < path.length) {
-									loc = loc.getJSONObject(path[i]);
+							//check if the annotation exists.
+							if(annotation.annotationType().equals(SerializableField.class)) {
+	
+								//inject data to field
+								JSONObject json = memoryManagement.retrieveJsonConfiguration(folder + type.getSimpleName());
+		
+								//retrieve the annotation
+								SerializableField fieldData = (SerializableField)annotation;
+								
+								//find the path of the variable in the json configuration
+								String[] path = fieldData.path().split("[.]");
+								
+								//find the jsonObject storing the variable
+								JSONObject loc = json;
+								for(int i = 0; i < path.length; i++) {
+									if((i+1) < path.length) {
+										loc = loc.getJSONObject(path[i]);
+									}
 								}
+								
+								//find the value of variable stored in the configuration
+								Object newValue = loc.get(path[path.length - 1]);
+	
+								//System.out.println(loc + " : " + path[path.length - 1] + " >> " + newValue);
+								
+								try {
+									//set the value for this variable
+									FieldUtils.setField(command, field, newValue);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								
 							}
-							
-							//find the value of variable stored in the configuration
-							Object newValue = loc.get(path[path.length - 1]);
-
-							//System.out.println(loc + " : " + path[path.length - 1] + " >> " + newValue);
-							
-							try {
-								//set the value for this variable
-								FieldUtils.setField(command, field, newValue);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-							
 						}
 					}
-				}
-				
-				//log entry
-				Logger.INFO("Command " + Arrays.toString(command.getMeta().name()) + " has been registered.");
-				
-				//add the command instance to the arrylist, this is post variable injection, so the command should work as intended
-				commands.add(command);
+					
+					//log entry
+					Logger.INFO("Command " + Arrays.toString(command.getMeta().name()) + " has been registered.");
+					
+					//add the command instance to the arrylist, this is post variable injection, so the command should work as intended
+					commands.add(command);
+				 
+				 }
 				
 			} catch (Exception e) {
 				e.printStackTrace();
+				System.err.println("could not retrieve the class " + clazz.getName());
 			}
 			
 			

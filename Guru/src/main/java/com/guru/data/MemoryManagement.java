@@ -45,6 +45,8 @@ public class MemoryManagement {
 		this.res = new File(path, "configuration");
 		this.setFiles(new File(path, "files"));
 		
+		Logger.INFO("Res -> " + this.res);
+		
 		if(path.getAbsolutePath().contains("target")) {
 			//res = new File(this.getClass().getResource("/configuration").getFile());
 			this.res = new File("C:\\Users\\synte\\OneDrive - University of Kent\\Desktop\\test123\\configuration");
@@ -89,6 +91,7 @@ public class MemoryManagement {
 		System.out.println("Processing " + res.getAbsoluteFile());
 		
 		for(File configuration : res.listFiles()) {
+			System.out.println("Processing " + configuration.getAbsoluteFile());
 			if(configuration.isDirectory()) {
 				this.addJsonFiles(configuration);
 				continue;

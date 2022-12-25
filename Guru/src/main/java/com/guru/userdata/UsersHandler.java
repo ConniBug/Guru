@@ -88,6 +88,24 @@ public class UsersHandler {
 		return true;
 	}
 	
+	public long timeRemainingTillUpdate(String id) {
+		Date now = new Date();
+		
+		if(!this.lastUpdated.containsKey(id) || !(this.users.stream().filter(o -> o.getUserID().equals(id)).count() > 0)) {
+			return 0;
+		}
+		
+		Date lastUpdated = this.lastUpdated.get(id);
+		
+		long difference = now.getTime() - lastUpdated.getTime();
+		
+		if(difference < UPDATE_TIMER) {
+			return (UPDATE_TIMER - difference);
+		}
+
+		return 0;
+	}
+	
 	public void update(UserModel data) {
 		
 		Date now = new Date();
@@ -138,7 +156,6 @@ public class UsersHandler {
 				new Thread(() -> {
 					o.loadMembers().get().stream().filter(k -> k.getId().equals(data.getUserID())).findFirst().ifPresent(p -> {
 						o.addRoleToMember(p, roles.get()).queue();
-						System.out.println("saved " + p.getEffectiveName());
 					});
 				}).start();
 			}

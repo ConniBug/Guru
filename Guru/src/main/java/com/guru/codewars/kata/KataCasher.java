@@ -81,11 +81,6 @@ public class KataCasher extends ListenerAdapter{
 					unresolved.setIssues(data.getJSONObject("unresolved").getInt("issues"));
 					
 					int voteScore = data.getInt("voteScore");
-					
-					//CreatedBy createdBy = new CreatedBy();		
-					//createdBy.setUrl(data.getJSONObject("createdBy").getString("url"));
-					//createdBy.setUrl(data.getJSONObject("createdBy").getString("username"));
-					
 					int totalStars = data.getInt("totalStars");
 					
 					String name = data.getString("name");

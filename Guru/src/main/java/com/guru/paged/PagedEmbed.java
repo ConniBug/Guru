@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
-import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 public class PagedEmbed extends ListenerAdapter{
@@ -33,7 +32,7 @@ public class PagedEmbed extends ListenerAdapter{
 	private String backID;
 	private String nextID;
 	
-	private MessageCreateAction message;
+	private Message message;
 
 	public void setEmbeds(Function<PagedEmbed.PagedData, EmbedBuilder> embeds) {
 		this.embeds = embeds;
@@ -65,10 +64,6 @@ public class PagedEmbed extends ListenerAdapter{
 
 	public void setNextID(String nextID) {
 		this.nextID = nextID;
-	}
-
-	public void setMessage(MessageCreateAction message) {
-		this.message = message;
 	}
 	
 	public class PagedData{
@@ -228,8 +223,7 @@ public class PagedEmbed extends ListenerAdapter{
 		buttons.add(back);
 		buttons.add(front);
 		
-		this.message = this.event.getMessage().replyEmbeds(this.build().build()).addActionRow(buttons);
-		this.message.queue();
+		this.setMessage(this.event.getMessage().replyEmbeds(this.build().build()).addActionRow(buttons).complete());
 		
 	}
 	
@@ -249,7 +243,7 @@ public class PagedEmbed extends ListenerAdapter{
 		buttons.add(front);
 		
 		MessageEditBuilder msg = MessageEditBuilder.fromMessage(message).clear().setActionRow(buttons).setEmbeds(this.build().build());
-		message.editMessage(msg.build()).queue();
+		this.setMessage(message.editMessage(msg.build()).complete());
 
 	}
 	
@@ -323,9 +317,12 @@ public class PagedEmbed extends ListenerAdapter{
 		return nextID;
 	}
 
-	public MessageCreateAction getMessage() {
+	public Message getMessage() {
 		return message;
 	}
-	
+
+	public void setMessage(Message message) {
+		this.message = message;
+	}
 
 }

@@ -4,8 +4,8 @@ import com.guru.userdata.UserModel;
 
 import net.dv8tion.jda.api.entities.User;
 
-@ShopMeta(cost = 1500, name = {"cRole"}, emoji = ":label:", description = "Create a custom role with it's own dedicated view ( does not include custom colours )", id = 1)
-public class CustomRole extends ShopItem{
+@ShopMeta(cost = 800, name = {"cColour"}, emoji = ":rainbow_flag:", description = "Pick your own colour, ( colours similar to predefined roles are not allowed ) **disclaimer, colours can only be used on custom roles**", id = 2)
+public class CustomColour extends ShopItem{
 
 	@Override
 	public void onBuyEvent(User user, UserModel profile) {

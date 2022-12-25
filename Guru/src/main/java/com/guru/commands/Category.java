@@ -11,7 +11,8 @@ public enum Category {
 	MATHS(":pencil:"),
 	CODEWARS(":computer:"),
 	ADMIN(":tools:"),
-	MONEY(":moneybag:");
+	MONEY(":moneybag:"),
+	SHOP(":gift:");
 		
 	private final String emoji;
 	

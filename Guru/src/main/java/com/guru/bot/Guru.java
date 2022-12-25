@@ -1,13 +1,17 @@
 package com.guru.bot;
 
 import java.util.EnumSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.guru.codewars.kata.KataCasher;
 import com.guru.commands.CommandManager;
+import com.guru.commands.shop.ItemHandler;
 import com.guru.credentials.Credentials;
 import com.guru.dailychallenges.DailyChallenges;
 import com.guru.data.MemoryManagement;
 import com.guru.data.StartupConfiguration;
+import com.guru.logger.Logger;
 import com.guru.userdata.UsersHandler;
 
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
@@ -35,6 +39,11 @@ public class Guru extends ListenerAdapter{
 	private final UsersHandler usersHandler;
 	private final KataCasher kataCasher;
 	private DailyChallenges dailyChallenges;
+	private final ItemHandler itemHandler;
+	
+	private final ExecutorService service;
+	private final int WORKER_THREADS = 3;
+
 	
 	private ShardManager JDA;
 	
@@ -58,7 +67,11 @@ public class Guru extends ListenerAdapter{
 	public Guru() {
 		
 		Guru.instance = this;
+	
+		this.service = Executors.newFixedThreadPool(this.WORKER_THREADS);
 
+		this.dailyChallenges = new DailyChallenges();
+		
 		this.management = new MemoryManagement();
 		this.credentials = new Credentials();
 		
@@ -69,7 +82,7 @@ public class Guru extends ListenerAdapter{
 		
 		this.management.inject(credentials, startupConfiguration);
 		
-		this.dailyChallenges = new DailyChallenges();
+		this.itemHandler = new ItemHandler();
 		
 		//instantiate the jda instance, this is done to login to discord
 		this.sharedManager = DefaultShardManagerBuilder
@@ -85,6 +98,7 @@ public class Guru extends ListenerAdapter{
 		this.commandManager.loadCommands();
 		
 		this.sharedManager.addEventListeners(this, this.commandManager);
+	
 	}
 	
 	public void start() {
@@ -135,9 +149,18 @@ public class Guru extends ListenerAdapter{
 	public void onGuildReady(GuildReadyEvent event) {
 		super.onGuildReady(event);
 		if(event.getGuild().getId().equals(DailyChallenges.GUILD_ID)) {
+			Logger.INFO("Starting up daily challenges for " + event.getGuild().getName());
 			this.dailyChallenges.start();
 		}
 	
+	}
+
+	public ExecutorService getExecutorService() {
+		return service;
+	}
+
+	public ItemHandler getItemHandler() {
+		return itemHandler;
 	}
 
 	

@@ -1,4 +1,4 @@
-package com.guru.commands.shop;
+package com.guru.shop;
 
 public enum TransactionType {
 	

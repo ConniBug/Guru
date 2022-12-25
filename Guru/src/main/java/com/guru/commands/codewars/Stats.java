@@ -2,6 +2,7 @@ package com.guru.commands.codewars;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,7 +25,7 @@ public class Stats extends CodewarsCommand{
 	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 		
 		
-		Message updateHandler;
+		Optional<Message> updateHandler;
 		
 		updateHandler = this.sendUpdateMessage(event.getAuthor().getId(), event);
 
@@ -64,11 +65,11 @@ public class Stats extends CodewarsCommand{
 		
 		embedBuilder.setFooter("if this seems unexpected, please contact @syntex#1389");
 		
-		if(updateHandler == null) {
+		if(updateHandler.isEmpty()) {
 			event.getMessage().replyEmbeds(embedBuilder.build()).queue();
 		}else {
-			MessageEditBuilder msg = MessageEditBuilder.fromMessage(updateHandler).clear().setEmbeds(embedBuilder.build());
-			updateHandler.editMessage(msg.build()).queue();	
+			MessageEditBuilder msg = MessageEditBuilder.fromMessage(updateHandler.get()).clear().setEmbeds(embedBuilder.build());
+			updateHandler.get().editMessage(msg.build()).queue();	
 		}
 		
 	}

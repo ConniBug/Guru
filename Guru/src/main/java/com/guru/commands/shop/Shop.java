@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.guru.bot.Guru;
 import com.guru.commands.Category;
 import com.guru.commands.Command;
 import com.guru.commands.CommandMeta;
 import com.guru.commands.shop.items.ShopItem;
-import com.guru.reflection.ShopScanner;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -21,7 +21,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
  * @version 0.0.1 
  *
  */
-@CommandMeta(name = {"shop"}, description = "Displays the help command", category = Category.MONEY, usage = {"help", "help <command>"})
+@CommandMeta(name = {"shop"}, description = "Displays the help command", category = Category.SHOP, usage = {"help", "help <command>"})
 public class Shop extends Command{
 
 	private List<ShopItem> items;
@@ -29,9 +29,7 @@ public class Shop extends Command{
 	public Shop() {
 		this.setAvailable(false);
 		
-		ShopScanner scanner = new ShopScanner();
-		
-		this.setItems(scanner.retrieveCommandsFromPackage("com.guru.commands.shop.items"));
+		this.setItems(Guru.getInstance().getItemHandler().getItems());
 		
 		//this horrible chunk of code was copied from the command handler class
 		Set<ShopItem> duplicates = new HashSet<>();

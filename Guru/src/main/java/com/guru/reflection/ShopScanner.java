@@ -40,7 +40,8 @@ public class ShopScanner {
 				
 
 				//log entry
-				Logger.INFO("Command " + Arrays.toString(command.getMeta().name()) + " has been registered.");
+				Logger.INFO("Item " + Arrays.toString(command.getMeta().name()) + " (id=" + command.getMeta().id() + ") has been registered");
+				
 				
 				//add the command instance to the arrylist, this is post variable injection, so the command should work as intended
 				commands.add(command);

@@ -19,8 +19,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-@CommandMeta(name = {"ckatas", "katas"}, description = "shows all katas the user has completed", category = Category.CODEWARS, usage = {"katas", "katas <@user>"})
-public class Completed extends CodewarsCommand{
+@CommandMeta(name = {"ckatas", "katas", "completedkatas"}, description = "shows all katas the user has completed", category = Category.CODEWARS, usage = {"katas", "katas <@user>"})
+public class CompletedKatas extends CodewarsCommand{
 
 	@Override
 	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
@@ -29,7 +29,7 @@ public class Completed extends CodewarsCommand{
 
 		UserModel model;
 		
-		Message updateHandler = null;
+		Optional<Message> updateHandler = null;
 		
 		if(mentions.size() > 0) {
 			
@@ -71,10 +71,10 @@ public class Completed extends CodewarsCommand{
 			return embedBuilder;
 		});
 		
-		if(updateHandler == null) {
+		if(updateHandler.isEmpty()) {
 			embed.sendAsReply();
 		}else {
-			embed.fromMessage(updateHandler);			
+			embed.fromMessage(updateHandler.get());			
 		}
 	
 	}

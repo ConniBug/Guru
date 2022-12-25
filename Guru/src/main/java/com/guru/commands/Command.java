@@ -63,65 +63,69 @@ public abstract class Command extends ListenerAdapter{
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event){
 		
-		try {
+		Guru.getInstance().getExecutorService().submit(() -> {
 		
-		//don't allow this command to be processed for bots, if the command in question doesnt allow bots
-		if(event.getAuthor().isBot() && !this.getMeta().permitBots()) return;
-		
-		for(String alternative : this.getMeta().name()) {
-
-			//prefix for the command, by taking the command prefix + the name of this command
-			String prefix = Guru.getInstance().getStartupConfiguration().getCommandPrefix() + alternative;
+			try {
 			
-			String[] rawMessage = event.getMessage().getContentRaw().split(" ");
-
-			//check if the first argument is the command
-			if(rawMessage[0].equalsIgnoreCase(prefix)) {
+			//don't allow this command to be processed for bots, if the command in question doesnt allow bots
+			if(event.getAuthor().isBot() && !this.getMeta().permitBots()) return;
+			
+			for(String alternative : this.getMeta().name()) {
+	
+				//prefix for the command, by taking the command prefix + the name of this command
+				String prefix = Guru.getInstance().getStartupConfiguration().getCommandPrefix() + alternative;
 				
-				for(String permission : this.getMeta().permission()) {
-				
-					//check if the user has the required permissions to execute this command
-					if(event.getMember().hasPermission(Permission.valueOf(permission)) || Developers.isDeveloper(event.getAuthor())) {
-				
-						//only let me ( syntex ) do the command if the command is not available
-						if(!this.available && !event.getAuthor().getId().equals("234004050201280512")) {
-							this.logError(event, "Sorry, this command is not yet ready, only sir syntex may execute this command.");
-							return;
-						}
-						
-						//retrieve the cooldown for the user if any
-						Optional<Cooldown> cooldowns = this.cooldowns.stream().filter(o -> o.getUserID().equals(event.getAuthor().getId())).findFirst();
-						
-						//prevent usage of this command if a cooldown exists, remove the cooldown
-						//if the cooldown is below 0, as we add a cooldown whenever the commmand
-						//is executed, developers are excempt
-						if(cooldowns.isPresent() && !Developers.isDeveloper(event.getAuthor())) {
-							Cooldown cooldown = cooldowns.get();
-							if(cooldown.timeRemaining() < 0) {
-								this.cooldowns.remove(cooldown);
-							}else {
-								this.logError(event, "Sorry, please wait " + TimeFormatter.formatDuration(cooldown.timeRemaining()/1000) + " before you can do this command again");
+				String[] rawMessage = event.getMessage().getContentRaw().split(" ");
+	
+				//check if the first argument is the command
+				if(rawMessage[0].equalsIgnoreCase(prefix)) {
+					
+					for(String permission : this.getMeta().permission()) {
+					
+						//check if the user has the required permissions to execute this command
+						if(event.getMember().hasPermission(Permission.valueOf(permission)) || Developers.isDeveloper(event.getAuthor())) {
+					
+							//only let me ( syntex ) do the command if the command is not available
+							if(!this.available && !event.getAuthor().getId().equals("234004050201280512")) {
+								this.logError(event, "Sorry, this command is not yet ready, only sir syntex may execute this command.");
 								return;
 							}
-						}
-						
-						if(this instanceof CodewarsCommand) {
-							//run the codewars command, same as command for now
-							this.onCommand(event, rawMessage);
+							
+							//retrieve the cooldown for the user if any
+							Optional<Cooldown> cooldowns = this.cooldowns.stream().filter(o -> o.getUserID().equals(event.getAuthor().getId())).findFirst();
+							
+							//prevent usage of this command if a cooldown exists, remove the cooldown
+							//if the cooldown is below 0, as we add a cooldown whenever the commmand
+							//is executed, developers are excempt
+							if(cooldowns.isPresent() && !Developers.isDeveloper(event.getAuthor())) {
+								Cooldown cooldown = cooldowns.get();
+								if(cooldown.timeRemaining() < 0) {
+									this.cooldowns.remove(cooldown);
+								}else {
+									this.logError(event, "Sorry, please wait " + TimeFormatter.formatDuration(cooldown.timeRemaining()/1000) + " before you can do this command again");
+									return;
+								}
+							}
+							
+							if(this instanceof CodewarsCommand) {
+								//run the codewars command, same as command for now
+								this.onCommand(event, rawMessage);
+							}else {
+								//run the command
+								this.onCommand(event, rawMessage);	
+							}
+							
+							
+							//add the cooldown
+							this.cooldowns.add(new Cooldown(event.getAuthor().getId(), this, new Date()));
+							
+							return;
+							
 						}else {
-							//run the command
-							this.onCommand(event, rawMessage);	
+							
+							this.logError(event, "You require the permissions " + Arrays.toString(this.getMeta().permission()) + " in order to execute this command");
+							
 						}
-						
-						
-						//add the cooldown
-						this.cooldowns.add(new Cooldown(event.getAuthor().getId(), this, new Date()));
-						
-						return;
-						
-					}else {
-						
-						this.logError(event, "You require the permissions " + Arrays.toString(this.getMeta().permission()) + " in order to execute this command");
 						
 					}
 					
@@ -129,13 +133,14 @@ public abstract class Command extends ListenerAdapter{
 				
 			}
 			
-		}
-		
-		}catch (Exception e) {
-			e.printStackTrace();
-			this.logError(event, e.getMessage(), e);
-		}
+			}catch (Exception e) {
+				e.printStackTrace();
+				this.logError(event, e.getMessage(), e);
+			}
 
+		});
+		
+		
 	}
 	
 	/**
