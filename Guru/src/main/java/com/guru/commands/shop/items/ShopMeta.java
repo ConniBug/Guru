@@ -45,6 +45,11 @@ public @interface ShopMeta {
      * @return the id of this item
      */
     public int id();
+    
+	/**
+	 * @return the usage of this item
+	 */
+    public String[] usage();
 
 }
 

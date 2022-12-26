@@ -11,6 +11,7 @@ import com.guru.commands.Category;
 import com.guru.commands.Command;
 import com.guru.commands.CommandMeta;
 import com.guru.commands.shop.items.ShopItem;
+import com.guru.utils.PrettyString;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -27,7 +28,7 @@ public class Shop extends Command{
 	private List<ShopItem> items;
 	
 	public Shop() {
-		this.setAvailable(false);
+		this.setAvailable(true);
 		
 		this.setItems(Guru.getInstance().getItemHandler().getItems());
 		
@@ -68,7 +69,9 @@ public class Shop extends Command{
 			
 			String n = (i < 10) ? "0"+(i+1)+"." : (i+1)+".";
 			
-			shopEmbed.addField("`" + n + "`\t " + item.getMeta().name()[0] + " - " + item.getMeta().cost() + " bablons", "```" + item.getMeta().description() + "```", false);
+			shopEmbed.addField("`" + n + "`\t " + item.getMeta().name()[0] + " - " + item.getMeta().cost() + " bablons", 
+					"```" + item.getMeta().description() + System.lineSeparator() + System.lineSeparator() + 
+					"``` ```Usage: " + PrettyString.prettyArray(item.getMeta().usage()) + "```", false);
 		}
 		
 		shopEmbed.setFooter("do ;buy {item number} {amount}(optional) to purchase something");

@@ -27,16 +27,18 @@ public class Inventory extends Command{
 	@Override
 	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 
-		ShopItem shopItem = Guru.getInstance().getItemHandler().getItemById(1).get();
-		this.getUserModel(event).getInventory().addItem(shopItem);
-		
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		
 		embedBuilder.setTitle("Codewars profile");
 		embedBuilder.setColor(Color.orange);
 		
+		if(this.getUserModel(event).getInventory().getItems().isEmpty()) {
+			embedBuilder.setDescription("You have nothing in your inventory.");
+		}
+		
 		this.getUserModel(event).getInventory().getItems().forEach(o -> {
-			//embedBuilder.addField(o.getName(), o.getAmount()+"", true);
+			ShopItem item = Guru.getInstance().getItemHandler().getItemById(o.getId()).get();
+			embedBuilder.addField("[" + item.getMeta().emoji() + "] - " + item.getMeta().name()[0], "`Amount owned " + o.getAmount() + "`", true);
 		});
 		
 		event.getMessage().replyEmbeds(embedBuilder.build()).queue();

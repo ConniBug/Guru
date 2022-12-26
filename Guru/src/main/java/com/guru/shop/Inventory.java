@@ -2,9 +2,9 @@ package com.guru.shop;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.gson.annotations.SerializedName;
-import com.guru.commands.shop.items.ShopItem;
 
 public class Inventory {
 
@@ -32,6 +32,13 @@ public class Inventory {
 			this.id = id;
 			this.amount = amount;
 		}
+		
+		public void increment() {
+			this.amount+=1;
+		}
+		public void increment(int amount) {
+			this.amount+=amount;
+		}
 	}
 	
 	@SerializedName("items")
@@ -44,12 +51,12 @@ public class Inventory {
 	}
 	
 	public boolean hasItem(int id) {
-		return this.items.stream().filter(o -> o.getName().equals(id)).count() > 0;
+		return this.items.stream().filter(o -> o.getId() == id).count() > 0;
 	}
 	
 	public int getAmount(int id) {
 		if(this.hasItem(id)) {
-			return (int)this.items.stream().filter(o -> o.getName()).count();
+			return (int)this.items.stream().filter(o -> o.getId() == id).count();
 		}
 		return 0;
 	}
@@ -61,39 +68,21 @@ public class Inventory {
 	public void setItems(List<Inventory.InventoryItem> items) {
 		this.items = items;
 	}
-	
-	public void addItem(ShopItem item) {
-		InventoryItem invItem = new InventoryItem(item.getMeta().name()[0], 1);
-		this.items.add(invItem);
+
+	public Optional<InventoryItem> getItem(int id) {
+		return this.items.stream().filter(o -> o.getId() == id).findFirst();
 	}
 	
-	public void addItem(ShopItem item, int amount) {
-		InventoryItem invItem = new InventoryItem(item.getMeta().name()[0], amount);
-		if(this.hasItem(item.getMeta().id())) {
-			
+	public void addItem(int item, int amount) {
+		if(this.hasItem(item)) {
+			this.getItem(item).get().increment(amount);
+		}else {
+			InventoryItem invItem = new InventoryItem(item, amount);
+			this.items.add(invItem);			
 		}
-		this.items.add(invItem);
-	}
-		
-	public void addItem(String item) {
-		InventoryItem invItem = new InventoryItem(item, 1);
-		this.items.add(invItem);
 	}
 	
-	public void addItem(String item, int amount) {
-		InventoryItem invItem = new InventoryItem(item, amount);
-		this.items.add(invItem);
-	}
 	
-	public void addItem(InventoryItem item) {
-		InventoryItem invItem = new InventoryItem(item.getName(), 1);
-		this.items.add(invItem);
-	}
-	
-	public void addItem(InventoryItem item, int amount) {
-		InventoryItem invItem = new InventoryItem(item.getName(), amount);
-		this.items.add(invItem);
-	}
 	
 	
 }
