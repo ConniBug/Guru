@@ -31,7 +31,7 @@ public class PageTest extends Command{
 		
 		List<String> list = IntStream.range(1, 26).mapToObj(String::valueOf).collect(Collectors.toList());
 		
-		PagedEmbed embedBuilder = PagedEmbed.create(event, list, 12, true, o -> {
+		PagedEmbed<String> embedBuilder = PagedEmbed.create(event, list, 12, true, o -> {
 			EmbedBuilder builder = new EmbedBuilder();
 			
 			builder.setTitle("Page Test");

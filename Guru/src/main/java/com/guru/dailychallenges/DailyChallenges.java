@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import com.guru.bot.Guru;
 import com.guru.codewars.kata.Kata;
+import com.guru.logger.Logger;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -36,16 +37,35 @@ public class DailyChallenges {
 	    	
 	    	MessageHistory history = MessageHistory.getHistoryFromBeginning(channel).complete();
 	    	
+	    	
+	    	
 	    	if(!history.isEmpty() && !channel.getLatestMessageId().equals("0")) {
-		    	channel.retrieveMessageById(channel.getLatestMessageId()).queue(o -> {
-		    		if(ChronoUnit.HOURS.between(OffsetDateTime.now(), o.getTimeCreated()) > 24) {
-				    	try {
-				    		this.tryAgain(channel);
-				    	}catch (Exception e) {
-				    		e.printStackTrace();
-				    	}	
-		    		}
-		    	});	
+	    		try {
+	    			//history.getRetrievedHistory().get(0);
+			    	//channel.retrieveMessageById(channel.getLatestMessageId()).queue(o -> {
+			    		
+			    		long hours = Math.abs(ChronoUnit.HOURS.between(OffsetDateTime.now(), history.getRetrievedHistory().get(0).getTimeCreated()));
+			    		Logger.INFO(hours + "hrs has passed since the last challenge.");
+			    		
+			    		if(hours > 23) {
+					    	try {
+					    		this.tryAgain(channel);
+					    	}catch (Exception e) {
+					    		e.printStackTrace();
+					    	}	
+			    		}
+			    	//});		
+	    		}catch (Exception e) {
+					try {
+						this.tryAgain(channel);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (ExecutionException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
 	    	}else {
 	    		try {
 		    		this.tryAgain(channel);
@@ -62,7 +82,10 @@ public class DailyChallenges {
 	public void tryAgain(TextChannel channel) throws InterruptedException, ExecutionException {
     	final int diff = difficulty[ThreadLocalRandom.current().nextInt(difficulty.length)];
 		
-		List<Kata> katas = Guru.getInstance().getKataCasher().getKatas().get().stream().filter(o -> {
+		List<Kata> katas = Guru.getInstance().getKataCasher().getKatas().get().stream()
+				
+		.filter(o -> o.getLanguages().contains("java"))
+		.filter(o -> {
 			if(o.getRankObject().getId() == diff*-1) return true;
 			return false;
 		}).collect(Collectors.toList());

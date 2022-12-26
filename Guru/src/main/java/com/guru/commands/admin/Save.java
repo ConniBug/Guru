@@ -10,7 +10,8 @@ import com.guru.commands.CommandMeta;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-@CommandMeta(category = Category.ADMIN, description = "save the cashed data", name = {"save", "cashe"}, usage = {"save"}, permission = {"ADMINISTRATOR"})
+@CommandMeta(category = Category.ADMIN, description = "save the cashed data", name = {"save", "cashe"},
+usage = {"save"}, permission = {"ADMINISTRATOR"})
 public class Save extends Command{
 
 	@Override

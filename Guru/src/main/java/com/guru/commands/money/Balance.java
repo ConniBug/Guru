@@ -1,7 +1,7 @@
 package com.guru.commands.money;
 
 import java.awt.Color;
-import java.util.List;
+import java.util.Optional;
 
 import com.guru.bot.Guru;
 import com.guru.commands.Category;
@@ -10,7 +10,7 @@ import com.guru.commands.CommandMeta;
 import com.guru.userdata.UserModel;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 /**
@@ -29,17 +29,17 @@ public class Balance extends Command{
 	@Override
 	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
 
-		String user = event.getAuthor().getId();
-		String name = event.getAuthor().getName();
+		Member user = event.getMember();
 		
 		if(args.length >= 2) {
-			List<User> a = event.getMessage().getMentions().getUsers();
-			if(a.size() > 0) {
-				user = a.get(0).getId();
-				name = args[1];
+			Optional<Member> users = this.getMemberFromCommand(event.getGuild(), args[1]).get();
+			if(users.isPresent()) {
+				user = users.get();
+			}else {
+				throw new Exception("The user " + args[1] + " does not exist!");
 			}
 		}
-		
+
 		UserModel userData = Guru.getInstance().getUsersHandler().getUserData(user);
 		
 		EmbedBuilder balance = new EmbedBuilder();
@@ -47,7 +47,7 @@ public class Balance extends Command{
 		
 		balance.setTitle("Balance 💸");
 		balance.setColor(Color.green);
-		balance.setDescription(name + "'s balance will be displayed below");
+		balance.setDescription(user.getEffectiveName() + "'s balance will be displayed below");
 		balance.addField("Bablons", "```" +userData.getBablons()+"```", true);
 		
 		event.getMessage().replyEmbeds(balance.build()).queue();

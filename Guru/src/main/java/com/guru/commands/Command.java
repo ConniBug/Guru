@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.guru.bot.Guru;
 import com.guru.commands.codewars.CodewarsCommand;
@@ -18,6 +20,8 @@ import com.guru.utils.TimeFormatter;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -220,7 +224,7 @@ public abstract class Command extends ListenerAdapter{
 				
 			}
 			
-			PagedEmbed builder = PagedEmbed.create(event, content, 1, true, page -> {
+			PagedEmbed<String> builder = PagedEmbed.create(event, content, 1, true, page -> {
 				
 				EmbedBuilder errorEmbed = new EmbedBuilder();
 				
@@ -335,7 +339,7 @@ public abstract class Command extends ListenerAdapter{
 			
 		}
 		
-		PagedEmbed builder = PagedEmbed.create(event, content, 1, true, page -> {
+		PagedEmbed<String> builder = PagedEmbed.create(event, content, 1, true, page -> {
 			
 			EmbedBuilder embedBuilder = new EmbedBuilder();
 			embedBuilder.appendDescription("You are currently viewing page " + page.getPage() + "/" + (page.getParent().getLastPage()-1));
@@ -350,6 +354,29 @@ public abstract class Command extends ListenerAdapter{
 		});
 		
 		builder.sendAsReply();
-		
 	}
+	
+	/**
+	 * 
+	 * @param guild the guild to get the member from
+	 * @param content the name/id/mention of the member
+	 * @return the member
+	 */
+	public Future<Optional<Member>> getMemberFromCommand(Guild guild, String content){
+		return Executors.newFixedThreadPool(1).submit(() -> {
+			
+			//find every member in the guild
+			List<Member> users = guild.loadMembers().get();
+			
+			for(Member user : users) {
+				if(user.getId().equals(content)) return Optional.of(user);
+				if(user.getAsMention().equals(content)) return Optional.of(user);
+				if(user.getEffectiveName().equalsIgnoreCase(content)) return Optional.of(user);
+			}
+			
+			return Optional.empty();
+		});
+	}
+	
+	
 }

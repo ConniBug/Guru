@@ -22,7 +22,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
  * @version 0.0.1 
  *
  */
-@CommandMeta(name = {"shop"}, description = "Displays the help command", category = Category.SHOP, usage = {"help", "help <command>"})
+@CommandMeta(name = {"shop"}, description = "Displays the help command", category = Category.SHOP, usage = {"shop"})
 public class Shop extends Command{
 
 	private List<ShopItem> items;
