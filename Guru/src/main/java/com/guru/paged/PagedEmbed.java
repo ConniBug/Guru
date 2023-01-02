@@ -229,6 +229,27 @@ public class PagedEmbed<T> extends ListenerAdapter{
 	}
 	
 	
+	public void fromEmbed(EmbedBuilder message) {
+		
+		this.start = new Date();
+		
+		this.backID = UUID.randomUUID().toString();
+		this.nextID = UUID.randomUUID().toString();
+		
+		Button back = Button.of(ButtonStyle.SECONDARY, this.backID, "Previous");
+		Button front = Button.of(ButtonStyle.SECONDARY, this.nextID, "Next");
+		
+		List<Button> buttons = new ArrayList<>();
+		buttons.add(back);
+		buttons.add(front);
+		
+		//MessageEditBuilder msg = MessageEditBuilder.fromMessage(message).clear().setActionRow(buttons).setEmbeds(this.build().build());
+		//this.setMessage(message.editMessage(msg.build()).complete());
+		
+		this.message.editMessageEmbeds(message.build());
+
+	}
+	
 	public void fromMessage(Message message) {
 		
 		this.start = new Date();
@@ -244,7 +265,8 @@ public class PagedEmbed<T> extends ListenerAdapter{
 		buttons.add(front);
 		
 		MessageEditBuilder msg = MessageEditBuilder.fromMessage(message).clear().setActionRow(buttons).setEmbeds(this.build().build());
-		this.setMessage(message.editMessage(msg.build()).complete());
+		
+		message.editMessage(msg.build()).queue();
 
 	}
 	

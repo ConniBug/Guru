@@ -47,8 +47,13 @@ public class Datum{
 		System.out.println(api + "/code-challenges/completed?page=0");
 		
 		CompletedKata o = gson.fromJson(json, CompletedKata.class);
-		
 		katas.add(o);
+		
+		//for(int i = 1; i < o.totalPages; i++) {
+			//json = Network.readURL(api + "/code-challenges/completed?page="+ i);
+			//CompletedKata k = gson.fromJson(json, CompletedKata.class);
+			//katas.add(k);
+		//}
 		
 		katas.forEach(k -> k.data.forEach(entries::add));
 		

@@ -47,7 +47,7 @@ public class DailyChallenges {
 			    		long hours = Math.abs(ChronoUnit.HOURS.between(OffsetDateTime.now(), history.getRetrievedHistory().get(0).getTimeCreated()));
 			    		Logger.INFO(hours + "hrs has passed since the last challenge.");
 			    		
-			    		if(hours > 23) {
+			    		if(hours > 18) {
 					    	try {
 					    		this.tryAgain(channel);
 					    	}catch (Exception e) {

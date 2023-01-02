@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import com.guru.async.message.AsyncMessageSender;
 import com.guru.bot.Guru;
 import com.guru.codewars.kata.Kata;
 import com.guru.codewars.users.katas.Datum;
@@ -18,37 +19,18 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 
-@CommandMeta(name = {"ckatas", "katas", "completedkatas"}, description = "shows all katas the user has completed", category = Category.CODEWARS, usage = {"katas", "katas <@user>"})
+@CommandMeta(name = {"ckatas", "katas", "completedkatas"}, description = "shows all katas the user has completed", category = Category.CODEWARS, usage = {"katas", "katas <@user>"}, cooldown = 60)
 public class CompletedKatas extends CodewarsCommand{
 
 	@Override
 	public void onCommand(MessageReceivedEvent event, String[] args) throws Exception {
-	
-		UserModel model;
 		
-		Optional<MessageCreateAction> updateHandler = null;
+		Message message = AsyncMessageSender.getUpdateMessage(event);
 		
-		Message message = null;
+		Member member = this.getMemberFromCommandOtherwiseGetUser(event);
 		
-		if(args.length == 1) {
-			updateHandler = this.sendUpdateMessage(event.getAuthor().getId(), event);
-			
-			if(updateHandler.isPresent()) {
-				message = updateHandler.get().complete();
-			}
-			
-			model = this.getUserModel(event);		
-		}else {
-			Optional<Member> member = this.getMemberFromCommand(event.getGuild(), args[1]).get();
-			if(member.isPresent()) {
-				updateHandler = this.sendUpdateMessage(member.get().getId(), event);
-				model = Guru.getInstance().getUsersHandler().getUserData(member.get());
-			}else {
-				throw new Exception("The user " + args[1] + " does not exist!");
-			}
-		}
+		UserModel model = Guru.getInstance().getUsersHandler().getUserData(member);
 		
 		if(!model.getCodewars().isRegistered()) {
 			throw new Exception("Sorry, you need to link your account first.");
@@ -74,12 +56,8 @@ public class CompletedKatas extends CodewarsCommand{
 			return embedBuilder;
 		});
 		
-		if(updateHandler.isEmpty()) {
-			embed.sendAsReply();
-		}else {
-			embed.fromMessage(message);			
-		}
-	
+		embed.fromMessage(message);
+
 	}
 	
 	public List<String> getSortedkatas(UserModel model) throws InterruptedException, ExecutionException {

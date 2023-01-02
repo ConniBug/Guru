@@ -34,9 +34,6 @@ public class UserModel {
 	
 	@SerializedName("bablons")
 	private int bablons;
-	
-	//@SerializedName("codewars")
-	//private String codewars;
 	   
 	@SerializedName("effectiveName")
 	private String effectiveName;

@@ -1,5 +1,7 @@
 package com.guru.commands;
 
+import java.awt.Color;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -10,9 +12,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import com.guru.bot.Guru;
 import com.guru.commands.help.Help;
 import com.guru.reflection.CommandScanner;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -120,6 +124,32 @@ public final class CommandManager extends ListenerAdapter{
 			event.replyEmbeds(new Help().genericHelpMenu()).queue();
 			event.deferReply().queue();
 		}
+		if(event.getFullCommandName().startsWith("ping")) {
+			EmbedBuilder ping = new EmbedBuilder();
+			
+			ping.setTitle(":ping_pong: Pong! :ping_pong:");
+			ping.setColor(Color.decode("#85EF93"));
+			ping.setThumbnail("https://cdn.discordapp.com/emojis/723073203307806761.gif?v=1");
+			
+			event.getJDA().getRestPing().queue(o -> {
+				ping.addField("Client latency", "```" + o + "ms```", false);
+				ping.addField("Websocket latency", "```" + event.getJDA().getGatewayPing() + "ms```", false);
+				
+				
+				long time = System.currentTimeMillis();
+				
+				Guru.getInstance().getManagement().getJson().keySet().stream().limit(10);
+				
+				ping.addField("JSON latency", "```" + Math.abs(time - System.currentTimeMillis()) + "ms```", false);
+				
+				ping.setFooter("User: " + event.getUser().getAsTag() + " | ID: " + event.getUser().getId(), event.getUser().getAvatarUrl());
+				ping.setTimestamp(Instant.now());
+				
+				event.replyEmbeds(ping.build()).queue();
+				event.deferReply();
+			});
+
+		}
 	}
 	
 	@Override
@@ -129,10 +159,12 @@ public final class CommandManager extends ListenerAdapter{
 		
 		Guild guild = event.getGuild();
 		
-		SlashCommandData slashCommand = Commands.slash("help", "shows the help command");
+		SlashCommandData slashCommand1 = Commands.slash("help", "shows the help command");
+		SlashCommandData slashCommand2 = Commands.slash("ping", "shows the ping");
 		
 		List<SlashCommandData> cmds = new ArrayList<>();
-		cmds.add(slashCommand);
+		cmds.add(slashCommand1);
+		cmds.add(slashCommand2);
 		
 		guild.updateCommands().addCommands(cmds).queue();
 		

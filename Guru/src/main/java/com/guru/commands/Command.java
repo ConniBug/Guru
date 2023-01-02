@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.guru.bot.Guru;
@@ -363,7 +362,7 @@ public abstract class Command extends ListenerAdapter{
 	 * @return the member
 	 */
 	public Future<Optional<Member>> getMemberFromCommand(Guild guild, String content){
-		return Executors.newFixedThreadPool(1).submit(() -> {
+		return Guru.getInstance().getExecutorService().submit(() -> {
 			
 			//find every member in the guild
 			List<Member> users = guild.loadMembers().get();
@@ -376,6 +375,30 @@ public abstract class Command extends ListenerAdapter{
 			
 			return Optional.empty();
 		});
+	}
+	
+	/**
+	 * 
+	 * @param guild the guild to get the member from
+	 * @param content the name/id/mention of the member
+	 * @return the member
+	 */
+	public Member getMemberFromCommandOtherwiseGetUser(MessageReceivedEvent e) throws Exception{
+		return Guru.getInstance().getExecutorService().submit(() -> {
+			
+			//find every member in the guild
+			List<Member> users = e.getGuild().loadMembers().get();
+			
+			for(Member user : users) {
+				for(String content : e.getMessage().getContentRaw().split(" ")) {
+					if(user.getId().equals(content)) return user;
+					if(user.getAsMention().equals(content)) return user;
+					if(user.getEffectiveName().equalsIgnoreCase(content)) return user;	
+				}
+			}
+			
+			return e.getMember();
+		}).get();
 	}
 	
 	
